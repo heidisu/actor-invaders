@@ -1,4 +1,4 @@
-# Space actors
+# Space invaders actor workshop
 
 In this workshop we will gradually complete the actors necessary to make the Space Invaders game work. The GUI part is already there, but it isn't doing anything yet. Our task will be to finish the game logic which uses a hierarchy of actors to manage updates and keep track of its state.
 
@@ -17,7 +17,7 @@ Communication between other actors mainly occurs between a parent and its childr
 
 ### The game objects
 
-## Let the game begin
+## Task 1: Let the game begin
 The actor `Game` is the main actor. It will receive messages from the `GUI` actor and from the message scehduler, create and organize actors for handling the player, the aliens and the bullets, and send new game state back to the `GUI`.
 Initially `Game` has five message types; `Tick`, `Start`, `Fire`, `MoveLeft` and `MoveRight`. (We will add more later, and it will receive DTO objects as messages) 
 
@@ -35,7 +35,7 @@ Instead of having conditionals and flags to decide wether the actor should react
   * The messages `MoveLeft` and `MoveRight` can be sent further to the `Player`, and we will work with the player in the next session. (We will come back to `Fire`later)
 * Start the application and see that you can click the start button and then is showed an empty, black screen. (Yeah, really exciting!)
 
-## Make the player move
+## Task 2: Make the player move
 The `Player`is the actor for the state of actual players's cannon in the game, and it keeps its current position (`posX`, `posY`) and the remaining number of `lives` as its state variables. Every time the player move it will send a `PlayerDto` to its parent actor `Game` (and the `Game` will include that dto as a part of a `GameStateDto` at every `Tick`). 
 
 * We will need to be able to make a `PlayerDto` quite often, so we can probably just create a method that makes one, and returns it. There is already a constant `image` that can be used as argument to the `PlayerDto`s constructor.
@@ -43,7 +43,7 @@ The `Player`is the actor for the state of actual players's cannon in the game, a
 * In the `Player`'s `createReceive` add matches in the builder for the `Game.MoveLeft` and `Game.MoveRight` messages. In the action function in the match we should update `posX`. Experiment with what number you feel is a good speed, it can be 5. Maybe you also want to stop the player from moving outside the screen? A `PlayerDto` should also be sendt back to the `Game`.
 * Start the game and see that you can move the player with the left and right arrows.
 
-## Firing bullets
+## Task 3: Firing bullets
 There are many ways to think about the bullets and how they should be modelled in the system. Are they owned by the object firing them, or do they live separately from the object creating them? Here we will let the bullets live separate from the object triggering the creation of them. But we need some bookkeeping to be able to deliver a list of current bullets and their positions to the `GUI`actor. We will terminate bullets when they move outside the screen or when they hit another object. Thus, we will also make a `BulletManager` to keep track of the total set of bullets in the game. The bullets themselves are tiny actors that keep track of their own position, and stop themselves if they move outside the screen.
 
 ### The Bullet
@@ -79,7 +79,7 @@ Now we have most of the pieces ready to fire bullets, we only need to put the pi
 * In the `Tick` match where the `GameStateDto` is sent to the `GUI`, the list of bullets for the previous step should be added. To make sure that we do not share mutable state out, the list of bullets should be put in a new list, it could even be in a `Collections.unmodifiableList`.
 * Start the game and see that the player now can fire bullets by pushing space. Well done!
 
-## Organize the aliens
+## Task 4: Organize the aliens
 The aliens are organized in a grid of 4 x 10 aliens, were bullets are fired random from one of the column where there still are aliens left. The bullet should then be fired from the lowermost alien in that column. Thw aliens all has a width of 40 px, and can be evenly distributed on the a screen of width 600 with 20 pixels between the aliens, in all directions.
 
 ![The grid of aliens](img/alien-grid.png)
@@ -110,9 +110,9 @@ Now the `BulletManager` will receive `CreateBullet`messages from two different s
 * Decide what you want to do with the `Bullet`actor in order to create bullets of these two kinds. Maybe you want to make it into an abstract base class with two classes, one for each bullet type, inheriting from it, or maybe just separate the different logic inside the same class, or something else. The style for the alien bullets should be `alien-bullet`.
 * The `BulletManager` should then be responsible for creating a `Bullet` with the right properties. But how can it know which type of `Bullet`it should make? Again there are choices. The manager can use the name of the sender to deduce what `Bullet`it should make, or we can extend the `CreateBullet` message to contain information that can be used to decide. In the first case the `BulletManager`is in control of what kind of bullets it want to make, in the latter, the sender of the message controls the decision.
 
-## it's a war!
+## Task 5: it's a war!
 
-## More things to look into
+## Bonus tasks
 
 ### Tests
 
