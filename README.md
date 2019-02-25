@@ -2,7 +2,7 @@
 
 In this workshop we will gradually complete the actors necessary to make the Space Invaders game work. The GUI part is already there, but it isn't doing anything yet. Our task will be to finish the game logic which uses a hierarchy of actors to manage updates and keep track of its state.
 
-![The actor hierarchy](img/actor-hierarchy.png)
+![The actor hierarchy](img/actor-hierarchy.png "The actor hierarchy")
 
 
 The game loop is driven by a scheduled message `Tick` which is sent to the main `Game`actor 20 times pr second, and `Game`'s main task is to send a `GameStateDto`to the `GUI`.
@@ -13,7 +13,7 @@ There are probably many ways to organize the actors and still get a working game
 
 Communication between other actors mainly occurs between a parent and its children. This approach gives only one entry point between the gui and the game logic, which makes it is easy to have full control over when the game is active, or ended and all the moving parts have to stop. Also the aliens move in a synchronized way so they can act entirely on their own. 
 
-
+![The message flow](img/message-flow.png "The flow of messages")
 
 ### The game objects
 
@@ -23,7 +23,7 @@ Initially `Game` has five message types; `Tick`, `Start`, `Fire`, `MoveLeft` and
 
 The first message is the one that gets the game going. At every `Tick` the current game state is sent to the `GUI` actor. `Start` is received when the user clicks the "Start game" button, and should move `Game` into an active state. When the `Game`is in active state it should response to the commands `Fire`, `MoveLeft` and `MoveRight` from the player.
 
-![The different states of the Game](img/gamestate.png)
+![The different states of the Game](img/gamestate.png "The different states of the game")
 
 Instead of having conditionals and flags to decide wether the actor should react to the the different messages or not, it will be better to keep the states clean and separate from each other. For that we will use the `become` functionality to move between the states.
 * Make two `Receive` objects in the `Game` actor, one for when the game has not yet started, and one for when the `Game` is playing, you can for instance call them `idle` and `playing`.
@@ -82,7 +82,7 @@ Now we have most of the pieces ready to fire bullets, we only need to put the pi
 ## Task 4: Organize the aliens
 The aliens are organized in a grid of 4 x 10 aliens, were bullets are fired random from one of the column where there still are aliens left. The bullet should then be fired from the lowermost alien in that column. Thw aliens all has a width of 40 px, and can be evenly distributed on the a screen of width 600 with 20 pixels between the aliens, in all directions.
 
-![The grid of aliens](img/alien-grid.png)
+![The grid of aliens](img/alien-grid.png "The grid of aliens")
 
 ### The Alien
 The `Alien` actor keep track of its current position, and its current image (since the aliens alternate between two images). It also need some logic for moving to the right for some time, and then move to the left, and the back again, and for alterating between the two images.
