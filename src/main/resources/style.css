@@ -1,0 +1,46 @@
+.root {
+    -fx-font-size: 16pt;
+    -fx-font-color: #00FF00;
+    -fx-text-fill: #00FF00;
+    -fx-stroke: #00FF00;
+    -fx-base: #000000;
+    -fx-background: #000000;
+}
+
+.button {
+    -fx-text-fill: #00FF00;
+    -fx-border-color: #00FF00;
+}
+
+#player {
+    -fx-fill: #00FF00;
+    -fx-stroke: #00FF00;
+}
+
+.player-bullet {
+    -fx-fill: #00FF00;
+    -fx-stroke: #00FF00;
+}
+
+.alien-bullet {
+    -fx-fill: #FFFFFF;
+    -fx-stroke: #FFFFFF;
+}
+
+
+.alien {
+    -fx-fill: #FFFFFF;
+    -fx-stroke: #FFFFFF;
+}
+
+.lives-label {
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+    -fx-font-size: 12;
+}
+
+.gameover-label {
+    -fx-text-fill: #FF00FF;
+    -fx-font-weight: bold;
+    -fx-font-size: 30;
+}
