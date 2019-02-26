@@ -4,6 +4,9 @@ import akka.actor.AbstractActor;
 import akka.actor.Props;
 import space.invaders.dto.GameStateDto;
 import space.invaders.dto.Image;
+import space.invaders.dto.PlayerDto;
+
+import java.util.function.Function;
 
 public class Player extends AbstractActor {
     private int lives = 3;
@@ -20,10 +23,31 @@ public class Player extends AbstractActor {
     }
 
     private Player(){
+        posX = sceneWidth/2 - width/2;
+        posY = sceneHeight - height;
+        getContext().getParent().tell(getPlayerDto(), getSelf());
+    }
+
+    private void updatePosition(Function<Integer, Integer> move){
+        int newPos = move.apply(posX);
+        posX = newPos < 0 || newPos > sceneWidth - width ? posX : newPos;
     }
 
     @Override
     public Receive createReceive() {
-        return receiveBuilder().build();
+        return receiveBuilder()
+                .match(Game.MoveLeft.class, ml -> {
+                    updatePosition(pos -> pos - 5);
+                    getContext().getParent().tell(getPlayerDto(), getSelf());
+                })
+                .match(Game.MoveRight.class, mr -> {
+                    updatePosition(pos -> pos + 5);
+                    getContext().getParent().tell(getPlayerDto(), getSelf());
+                })
+                .build();
+    }
+
+    private PlayerDto getPlayerDto() {
+        return new PlayerDto(posX, posY, lives, image);
     }
 }

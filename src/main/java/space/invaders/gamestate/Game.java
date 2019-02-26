@@ -68,6 +68,7 @@ public class Game extends AbstractActor {
                 .match(Tick.class, tick -> guiActor.tell(new GameStateDto(GameStateDto.State.Playing, playerDto, bullets, aliens), getSelf()))
                 .match(MoveLeft.class, ml -> player.tell(ml, getSelf()))
                 .match(MoveRight.class, mr -> player.tell(mr, getSelf()))
+                .match(PlayerDto.class, playerDto -> this.playerDto = playerDto)
                 .build();
     }
 
