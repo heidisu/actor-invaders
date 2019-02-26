@@ -19,6 +19,9 @@ public class Player extends AbstractActor {
         return Props.create(Player.class, Player::new);
     }
 
+    private Player(){
+    }
+
     @Override
     public Receive createReceive() {
         return receiveBuilder().build();

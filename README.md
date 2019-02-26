@@ -39,11 +39,16 @@ Instead of having conditionals and flags to decide wether the actor should react
 * Start the application and see that you can click the start button and then is showed an empty, black screen. (Yeah, really exciting!)
 
 ## Task 2: Make the player move
+Let us get the player into action! Both the player and the aliens are represented by images on the game screen. The screen has fixed size of `600 x 400` px, where `(0, 0)` is the upper left corner, and the position of an image is given by the coordinates of the image's upper left corner.
+
+![The coordinate system](img/screen-coordinates.png "The coordinate system of the screen")
+
 The `Player`is the actor for the state of actual players's cannon in the game, and it keeps its current position (`posX`, `posY`) and the remaining number of `lives` as its state variables. Every time the player move it will send a `PlayerDto` to its parent actor `Game` (and the `Game` will include that dto as a part of a `GameStateDto` at every `Tick`). 
 
 * We will need to be able to make a `PlayerDto` quite often, so we can probably just create a method that makes one, and returns it. There is already a constant `image` that can be used as argument to the `PlayerDto`s constructor.
 * In the constructor of the `Player` we should set the inital position for the cannon. A normal position would be in the middle, at the bottom of the screen. We should also immediately send a `PlayerDto`back to the `Game`. The `Player` actor is a child of `Game`, so we can use `getContext().parent()` to get hold of the `Game` actorRef.
 * In the `Player`'s `createReceive` add matches in the builder for the `Game.MoveLeft` and `Game.MoveRight` messages. In the action function in the match we should update `posX`. Experiment with what number you feel is a good speed, it can be 5. Maybe you also want to stop the player from moving outside the screen? A `PlayerDto` should also be sendt back to the `Game`.
+* In `Game` we should receive the `PlayerDto` and update the local variable.
 * Start the game and see that you can move the player with the left and right arrows.
 
 ## Task 3: Firing bullets
