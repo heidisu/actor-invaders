@@ -21,11 +21,11 @@ Communication between other actors mainly occurs between a parent and its childr
 The actor `Game` is the main actor. It will receive messages from the `GUI` actor and from the message scehduler, and create and organize actors for handling the player, the aliens, and the bullets, and send new game state back to the `GUI`.
 Initially `Game` has five message types; `Tick`, `Start`, `Fire`, `MoveLeft` and `MoveRight`. (We will add more later, and it will receive DTO objects as messages) 
 
-The first message is the one that gets the game going. At every `Tick` the current game state is sent to the `GUI` actor. `Start` is received when the user clicks the "Start game" button, and should move `Game` into an active state. When the `Game`is in active state it should response to the commands `Fire`, `MoveLeft` and `MoveRight` from the player.
+The first message is the one that gets the game going. At every `Tick` the current game state is sent to the `GUI` actor. `Start` is received when the user clicks the "Start game" button, and should move `Game` into an active state. When the `Game`is in active state it should response to the commands `Fire`, `MoveLeft` and `MoveRight` from the player, and `Tick`from the scheduler.
 
 ![The different states of the Game](img/gamestate.png "The different states of the game")
 
-Instead of having conditionals and flags to decide wether the actor should react to the the different messages or not, it will be better to keep the states clean and separate from each other. For that we will use the `become` functionality to move between the states.
+Instead of having conditionals and flags to decide wether the actor should react to the the different messages or not, it will be better to keep the states clean and separate from each other. For that we will use the [`become`](https://doc.akka.io/docs/akka/2.5/actors.html) functionality to move between the states.
 * Make two `Receive` objects in the `Game` actor, one for when the game has not yet started, and one for when the `Game` is playing, you can for instance call them `idle` and `playing`.
 * The idle `Recieve` should only react to `Start` messages, and when it receive such a message it should create the `Player` actor, and then become the playing `Receive`.
   * The player actor can be created by`getContext().actorOf(Player.props(), "player")` You are in the context on the `Game` actor, so the player actor will be a child of the `Game` actor, with the name "player". 
