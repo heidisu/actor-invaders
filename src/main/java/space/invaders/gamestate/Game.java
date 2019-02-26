@@ -11,6 +11,7 @@ import space.invaders.dto.GameStateDto;
 import space.invaders.dto.PlayerDto;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class Game extends AbstractActor {
@@ -18,6 +19,7 @@ public class Game extends AbstractActor {
     private final int width = GameStateDto.screenSize.width;
     private final int height = GameStateDto.screenSize.height;
     private ActorRef player;
+    private ActorRef bulletMananger;
     private PlayerDto playerDto;
     private List<BulletDto> bullets = new ArrayList<>();
     private List<AlienDto> aliens = new ArrayList<>();
@@ -48,6 +50,14 @@ public class Game extends AbstractActor {
 
     }
 
+    public static class Bullets {
+        final List<BulletDto> bullets;
+
+        public Bullets(List<BulletDto> bullets) {
+            this.bullets = bullets;
+        }
+    }
+
     private Game(ActorRef guiActor) {
         this.guiActor = guiActor;
     }
@@ -56,7 +66,8 @@ public class Game extends AbstractActor {
     private Receive getIdle() {
         return receiveBuilder()
                 .match(Start.class, start -> {
-                        this.player = getContext().actorOf(Player.props(), "player");
+                        player = getContext().actorOf(Player.props(), "player");
+                        bulletMananger = getContext().actorOf(BulletManager.props(), "bulletmanager");
                         log.info("Game started!");
                         getContext().become(getPlaying());
                 })
@@ -65,10 +76,15 @@ public class Game extends AbstractActor {
 
     private Receive getPlaying() {
         return receiveBuilder()
-                .match(Tick.class, tick -> guiActor.tell(new GameStateDto(GameStateDto.State.Playing, playerDto, bullets, aliens), getSelf()))
+                .match(Tick.class, tick -> {
+                    guiActor.tell(new GameStateDto(GameStateDto.State.Playing, playerDto, bullets, aliens), getSelf());
+                    bulletMananger.tell(tick, getSelf());
+                })
                 .match(MoveLeft.class, ml -> player.tell(ml, getSelf()))
                 .match(MoveRight.class, mr -> player.tell(mr, getSelf()))
                 .match(PlayerDto.class, playerDto -> this.playerDto = playerDto)
+                .match(Fire.class, fire -> player.tell(new Player.Fire(bulletMananger), getSelf()))
+                .match(Bullets.class, bullets -> this.bullets = bullets.bullets)
                 .build();
     }
 

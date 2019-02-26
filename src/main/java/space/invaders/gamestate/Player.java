@@ -1,6 +1,7 @@
 package space.invaders.gamestate;
 
 import akka.actor.AbstractActor;
+import akka.actor.ActorRef;
 import akka.actor.Props;
 import space.invaders.dto.GameStateDto;
 import space.invaders.dto.Image;
@@ -20,6 +21,14 @@ public class Player extends AbstractActor {
 
     static Props props() {
         return Props.create(Player.class, Player::new);
+    }
+
+    static class Fire {
+        final ActorRef bulletManager;
+
+        public Fire(ActorRef bulletManager) {
+            this.bulletManager = bulletManager;
+        }
     }
 
     private Player(){
@@ -43,6 +52,9 @@ public class Player extends AbstractActor {
                 .match(Game.MoveRight.class, mr -> {
                     updatePosition(pos -> pos + 5);
                     getContext().getParent().tell(getPlayerDto(), getSelf());
+                })
+                .match(Fire.class, fire -> {
+                    fire.bulletManager.tell(new BulletManager.CreateBullet(posX + width/2, posY), getSelf());
                 })
                 .build();
     }
