@@ -15,12 +15,12 @@ public class Player extends AbstractActor {
     private final int sceneWidth = GameStateDto.screenSize.width;
     private final int sceneHeight = GameStateDto.screenSize.height;
 
-    static public Props props(int sceneWidth, int sceneHeight) {
+    static Props props() {
         return Props.create(Player.class, Player::new);
     }
 
     @Override
     public Receive createReceive() {
-        return null;
+        return receiveBuilder().build();
     }
 }

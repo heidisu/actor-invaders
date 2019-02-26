@@ -8,6 +8,7 @@ import akka.event.LoggingAdapter;
 import space.invaders.dto.AlienDto;
 import space.invaders.dto.BulletDto;
 import space.invaders.dto.GameStateDto;
+import space.invaders.dto.PlayerDto;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +18,7 @@ public class Game extends AbstractActor {
     private final int width = GameStateDto.screenSize.width;
     private final int height = GameStateDto.screenSize.height;
     private ActorRef player;
+    private PlayerDto playerDto;
     private List<BulletDto> bullets = new ArrayList<>();
     private List<AlienDto> aliens = new ArrayList<>();
 
