@@ -18,7 +18,7 @@ Communication between other actors mainly occurs between a parent and its childr
 ### The game objects
 
 ## Task 1: Let the game begin
-The actor `Game` is the main actor. It will receive messages from the `GUI` actor and from the message scehduler, create and organize actors for handling the player, the aliens and the bullets, and send new game state back to the `GUI`.
+The actor `Game` is the main actor. It will receive messages from the `GUI` actor and from the message scehduler, and create and organize actors for handling the player, the aliens, and the bullets, and send new game state back to the `GUI`.
 Initially `Game` has five message types; `Tick`, `Start`, `Fire`, `MoveLeft` and `MoveRight`. (We will add more later, and it will receive DTO objects as messages) 
 
 The first message is the one that gets the game going. At every `Tick` the current game state is sent to the `GUI` actor. `Start` is received when the user clicks the "Start game" button, and should move `Game` into an active state. When the `Game`is in active state it should response to the commands `Fire`, `MoveLeft` and `MoveRight` from the player.
