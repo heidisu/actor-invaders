@@ -31,6 +31,7 @@ Instead of having conditionals and flags to decide wether the actor should react
   * The player actor can be created by`getContext().actorOf(Player.props(), "player")` You are in the context on the `Game` actor, so the player actor will be a child of the `Game` actor, with the name "player". 
   * You might want to save the player actorref in an instance variable so you have it for later
   * Maybe you also want to log that the game has started, so you really know. There is a `log` instance member use can use for that.
+  * Finally, the `Game` should move on to `playing` state, that is acheived with `getContext().become()`.
 * The second, `playing`, should *not* react to `Start`, but the other messages. 
   * When it recieves `Tick`it should tell the `GameStateDto` to the gui actor. The way to tell something to an actor is to use the `tell` method on an `actorRef` like `guiActor.tell(new GameStateDto(...), getSelf()))`. The bullets and aliens can just be empty lists for the time being. The `playerDto`is available as an instance variable, but it is immutable and thus safe to give away, the state can be `GameStateDto.State.Playing`.
   * The messages `MoveLeft` and `MoveRight` can be told further to the `Player`, and we will work with the player in the next session. (We will come back to `Fire`later).
