@@ -53,10 +53,27 @@ public class Game extends AbstractActor {
     }
 
 
+    private Receive getIdle() {
+        return receiveBuilder()
+                .match(Start.class, start -> {
+                        this.player = getContext().actorOf(Player.props(), "player");
+                        log.info("Game started!");
+                        getContext().become(getPlaying());
+                })
+                .build();
+    }
+
+    private Receive getPlaying() {
+        return receiveBuilder()
+                .match(Tick.class, tick -> guiActor.tell(new GameStateDto(GameStateDto.State.Playing, playerDto, bullets, aliens), getSelf()))
+                .match(MoveLeft.class, ml -> player.tell(ml, getSelf()))
+                .match(MoveRight.class, mr -> player.tell(mr, getSelf()))
+                .build();
+    }
 
     @Override
     public Receive createReceive() {
-        return receiveBuilder().build();
+        return getIdle();
     }
 
 }
