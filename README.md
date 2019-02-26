@@ -48,6 +48,7 @@ The `Player`is the actor for the state of actual players's cannon in the game, a
 * We will need to be able to make a `PlayerDto` quite often, so we can probably just create a method that makes one, and returns it. There is already a constant `image` that can be used as argument to the `PlayerDto`s constructor.
 * In the constructor of the `Player` we should set the inital position for the cannon. A normal position would be in the middle, at the bottom of the screen. We should also immediately send a `PlayerDto`back to the `Game`. The `Player` actor is a child of `Game`, so we can use `getContext().parent()` to get hold of the `Game` actorRef.
 * In the `Player`'s `createReceive` add matches in the builder for the `Game.MoveLeft` and `Game.MoveRight` messages. In the action function in the match we should update `posX`. Experiment with what number you feel is a good speed, it can be 5. Maybe you also want to stop the player from moving outside the screen? A `PlayerDto` should also be sendt back to the `Game`.
+* In `Game` we should receive the `PlayerDto` and update the local variable.
 * Start the game and see that you can move the player with the left and right arrows.
 
 ## Task 3: Firing bullets
