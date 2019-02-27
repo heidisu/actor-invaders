@@ -114,7 +114,7 @@ The `AlienManager` has some similarities with the `BulletManager`, it creates al
   * The aliens should be watched by the manager
 * The manager should respond to messages of type `Tick`, `AlienDto`and `Terminated`
   * On `Tick`it should decide if it want to fire a random bullet. Perhaps nice to have a separate method for firing the bullet, and the method should randomly choose one of the lowermost aliens from each column (if the column still has aliens left), and tell the selected `Alien` to `Fire`. You probably don't want to fire a bullet at every `Tick`, then it feels like it's raining bullets. 
-  * On `Tick`the manager should also tell the all the aliens to tick, and also sendt the `AlienDto`s back to the game
+  * On `Tick`the manager should also tell all the aliens to tick, and send the `AlienDto`s back to the game, in `Game` we should add a corresponding match which save the aliens in the local `aliens` variable.
   * When `AlienDto`is received, the manager should update the `refToAlien` map.
   * When `Terminated`is recieved, the dead alien should be removed from all the places it is kept in local variables.
 
