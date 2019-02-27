@@ -29,7 +29,7 @@ public class AlienManager extends AbstractActor {
         int id = 1;
         var posY = 20;
         for (int j = 0; j < rows; j++) {
-            var image = AlienImage.images.get(j % AlienImage.images.size());
+            var image = AlienImageSet.images.get(j % AlienImageSet.images.size());
             for (int i = 0; i < columns; i++) {
                 var posX = 10 + 60 * i;
                 var alien = context().actorOf(Alien.props(id, posX, posY, image), "alien-" + id);

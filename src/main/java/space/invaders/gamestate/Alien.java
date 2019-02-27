@@ -12,7 +12,7 @@ public class Alien extends AbstractActor {
     private final int id;
     private int posX;
     private final int posY;
-    private final AlienImage image;
+    private final AlienImageSet imageSet;
     private int countDown = 10;
     private String currentImage;
     private final Function<Integer, Integer> moveRight = i -> i + 5;
@@ -20,8 +20,8 @@ public class Alien extends AbstractActor {
     private Function<Integer, Integer> move = moveRight;
     private int countMoves;
 
-    static Props props(int id, int posX, int posY, AlienImage image){
-        return Props.create(Alien.class, () -> new Alien(id, posX, posY, image));
+    static Props props(int id, int posX, int posY, AlienImageSet imageSet){
+        return Props.create(Alien.class, () -> new Alien(id, posX, posY, imageSet));
     }
 
     static class Fire {
@@ -32,12 +32,12 @@ public class Alien extends AbstractActor {
         }
     }
 
-    public Alien(int id, int posX, int posY, AlienImage image) {
+    public Alien(int id, int posX, int posY, AlienImageSet imageSet) {
         this.id = id;
-        this.currentImage = image.imagePath1;
+        this.currentImage = imageSet.imagePath1;
         this.posX = posX;
         this.posY = posY;
-        this.image = image;
+        this.imageSet = imageSet;
     }
 
     @Override
@@ -45,7 +45,7 @@ public class Alien extends AbstractActor {
         return receiveBuilder()
                 .match(Game.Tick.class, tick -> {
                     if(countDown == 0) {
-                        currentImage = currentImage.equals(image.imagePath1) ? image.imagePath2 : image.imagePath1;
+                        currentImage = currentImage.equals(imageSet.imagePath1) ? imageSet.imagePath2 : imageSet.imagePath1;
                         posX = move.apply(posX);
                         countDown = 10;
                         countMoves++;
@@ -57,9 +57,9 @@ public class Alien extends AbstractActor {
                         countMoves = -15;
                         move = move.equals(moveLeft) ? moveRight : moveLeft;
                     }
-                    context().parent().tell(new AlienDto(id, posX, posY, new Image(image.width, image.height, currentImage)), self());
+                    context().parent().tell(new AlienDto(id, posX, posY, new Image(imageSet.width, imageSet.height, currentImage)), self());
                 } )
-                .match(Fire.class, fire -> fire.bulletManager.tell(new BulletManager.CreateBullet(posX + image.width/2, posY + image.height), getSelf()))
+                .match(Fire.class, fire -> fire.bulletManager.tell(new BulletManager.CreateBullet(posX + imageSet.width/2, posY + imageSet.height), getSelf()))
                 .build();
     }
 }
