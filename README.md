@@ -120,16 +120,24 @@ The `AlienManager` has some similarities with the `BulletManager`, it creates al
 
 ### The Bullet and the BulletManager
 Now the `BulletManager` will receive `CreateBullet`messages from two different senders; from the `Player`and from the `AlienManager`. It therefore needs to create two different kinds of bullets, one with the player style and which are moving upwards, and one with alien style which is mowing downwards. 
-* Decide what you want to do with the `Bullet`actor in order to create bullets of these two kinds. Maybe you want to make it into an abstract base class with two classes, one for each bullet type, inheriting from it, or maybe just separate the different logic inside the same class, or something else. The style for the alien bullets should be `alien-bullet`.
+* Decide what you want to do with the `Bullet`actor in order to create bullets of these two kinds. Maybe you want to make it into an abstract base class with two sub classes, one for each bullet type, or maybe just separate the different logic inside the same class, or something else. The style for the alien bullets should be `alien-bullet`.
 * The `BulletManager` should then be responsible for creating a `Bullet` with the right properties. But how can it know which type of `Bullet`it should make? Again there are choices. The manager can use the name of the sender to deduce what `Bullet`it should make, or we can extend the `CreateBullet` message to contain information that can be used to decide. In the first case the `BulletManager`is in control of what kind of bullets it want to make, in the latter, the sender of the message controls the decision.
 
+### In Game
+* Create the `ActorManager`
+* Send `Tick`also to the `ActorManager`
+
 ## Task 5: it's a war!
+We are pretty close to something that behaves like a game!
 
 ## Bonus tasks
 
 ### Tests
 
+### Organize the actors in a different way
+
+### Typed Actors
+
 ### Remoting
 
-### Organize the actors in a different way
 
