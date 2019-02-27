@@ -110,7 +110,7 @@ The `AlienManager` has some similarities with the `BulletManager`, it creates al
 * Make a constructor and static `props` method. Both should take an `ActorRef` for the `BulletManager` as argument.
 * The grid of aliens can be initialized in the constructor
   * Use for instance a double for loop, and add actorRefs to the manager's grid variable and the alienRef list.
-  * Use the three different images sets defined in `AlienImageSet`.
+  * Use the three different image sets defined in `AlienImageSet`.
   * The aliens should be watched by the manager
 * The manager should respond to messages of type `Tick`, `AlienDto`and `Terminated`
   * On `Tick`it should decide if it want to fire a random bullet. Perhaps nice to have a separate method for firing the bullet, and the method should randomly choose one of the lowermost aliens from each column (if the column still has aliens left), and tell the selected `Alien` to `Fire`. You probably don't want to fire a bullet at every `Tick`, then it feels like it's raining bullets. 
