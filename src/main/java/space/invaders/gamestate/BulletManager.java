@@ -40,12 +40,12 @@ public class BulletManager extends AbstractActor {
                 })
                 .match(Game.Tick.class, tick -> {
                     bulletRefs.stream().parallel().forEach(br -> br.tell(tick, getSelf()));
-                    getContext().getParent().tell(new Game.Bullets(List.copyOf(refToBulletDto.values())), getSelf());
+                    getContext().getParent().tell(new Game.Bullets(List.copyOf(refToBullet.values())), getSelf());
                 })
-                .match(BulletDto.class, bd -> refToBulletDto.put(getSender(), bd))
+                .match(BulletDto.class, bd -> refToBullet.put(getSender(), bd))
                 .match(Terminated.class, t -> {
                     bulletRefs.remove(t.getActor());
-                    refToBulletDto.remove(t.getActor());
+                    refToBullet.remove(t.getActor());
                 })
                 .build();
     }
