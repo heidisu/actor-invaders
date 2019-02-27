@@ -11,7 +11,7 @@ import java.util.*;
 public class BulletManager extends AbstractActor {
     private int nextId = 1;
     private Set<ActorRef> bulletRefs = new HashSet<>();
-    private Map<ActorRef, BulletDto> refToBulletDto = new HashMap<>();
+    private Map<ActorRef, BulletDto> refToBullet = new HashMap<>();
 
     public static Props props(){
         return Props.create(BulletManager.class, BulletManager::new);

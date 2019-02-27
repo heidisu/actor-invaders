@@ -26,7 +26,7 @@ public class Game extends AbstractActor {
 
     private LoggingAdapter log = Logging.getLogger(getContext().getSystem(), this);
 
-    static public Props props(ActorRef guiActor) {
+    public static Props props(ActorRef guiActor) {
         return Props.create(Game.class, () -> new Game(guiActor));
     }
 
