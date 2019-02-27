@@ -97,23 +97,23 @@ The aliens are organized in a grid of 4 x 10 aliens, were bullets are fired rand
 ![The grid of aliens](img/alien-grid.png "The grid of aliens")
 
 ### The Alien
-The `Alien` actor keep track of its current position, and its current image (since the aliens alternate between two images). It also need some logic for moving to the right for some time, and then move to the left, and the back again, and for alterating between the two images.
-* Add a constructor and a static `props` method that takes `id`, `posX`, `posY` and `imageSet`.
-* Make a new message type similar to the one we made for the `Player`. It can be called `Fire` and should take a `BulletManager`as reference.
+The `Alien` actor keep track of its current position, and its current image, since the aliens alternate between two images. It also need some logic for moving to the right for some time, and then move to the left, and the back again, and for alternating the images.
+* Add a constructor and a static `props` method that takes integers `id`, `posX`, `posY`, and `image` of type `AlienImage`, and make and set corresponding private fields.
+* Make a new message type similar to the one we made for the `Player`. It can be called `Fire` and should take a `BulletManager`actorRef as constructor argument.
 * Add matches in the receiveBulder for `Tick` and `Fire`.
-  * On `Tick` the alien should move, and the send  an `AlienDto` message to its parent. Some logic is needed for moving first right, then left, and then to the right again. And to alernate between the to images. An easy approach can be to just keep some internal counters which are incremented until some limit is reached and the direction and the image are changed, respectively, and the counter is reset.
-  * On `Fire` the `Alien` should tell `CreateBullet` to the bulletManager.
+  * On `Tick` the alien should move, and the send  an `AlienDto` message to its parent. Some logic is needed for moving first right, then left, and then to the right again. And to alternate between the two images. An easy approach can be to just keep some internal counters which are incremented until some limit is reached and the direction and the image are changed, respectively, and the counter is reset.
+  * On `Fire` the `Alien` should tell `CreateBullet` to the bulletManager. The `AlienImage` has fields for height and width that might be useful for centering the position of the bullet.
 
 
 ### The AlienManager
 The `AlienManager` has some similarities with the `BulletManager`, it creates all the `Alien` actors, and watch them so that it can remove dead aliens. The manager receives `AlienDto` messages from aliens, and sends a current list of `AlienDto`back to `Game` at each `Tick`. The aliens are organized in a grid, and the manager is responsible for making a random alien fire a bullet now and then.
 * Make a constructor and static `props` method. Both should take an `ActorRef` for the `BulletManager` as argument.
 * The grid of aliens can be initialized in the constructor
-  * Use for instance a double for-loop, and add actorrefs to the managers grid variable and the alienRef list.
+  * Use for instance a double for loop, and add actorRefs to the manager's grid variable and the alienRef list.
   * Use the three different images sets defined in `AlienImageSet`.
   * The aliens should be watched by the manager
 * The manager should respond to messages of type `Tick`, `AlienDto`and `Terminated`
-  * On `Tick`it should decide if it want to fire a random bullet. Probably nice to have a separate method for firing a random bullet. The method should randomly choose one of the lowermost aliens from each column (if the column still has aliens left), and tell the selected `Alien` to `Fire`. You probably don't want to fire a bullet at every `Tick`, then it feels like it's raining bullets. 
+  * On `Tick`it should decide if it want to fire a random bullet. Perhaps nice to have a separate method for firing the bullet, and the method should randomly choose one of the lowermost aliens from each column (if the column still has aliens left), and tell the selected `Alien` to `Fire`. You probably don't want to fire a bullet at every `Tick`, then it feels like it's raining bullets. 
   * When `AlienDto`is received, the manager should update the `refToAlien` map.
   * When `Terminated`is recieved, the dead alien should be removed from all the places it is kept in local variables.
 
