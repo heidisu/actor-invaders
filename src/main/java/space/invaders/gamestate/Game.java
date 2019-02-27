@@ -20,6 +20,7 @@ public class Game extends AbstractActor {
     private final int height = GameStateDto.screenSize.height;
     private ActorRef player;
     private ActorRef bulletMananger;
+    private ActorRef alienManager;
     private PlayerDto playerDto;
     private List<BulletDto> bullets = new ArrayList<>();
     private List<AlienDto> aliens = new ArrayList<>();
@@ -58,6 +59,14 @@ public class Game extends AbstractActor {
         }
     }
 
+    public static class Aliens {
+        final List<AlienDto> aliens;
+
+        public Aliens(List<AlienDto> aliens) {
+            this.aliens = aliens;
+        }
+    }
+
     private Game(ActorRef guiActor) {
         this.guiActor = guiActor;
     }
@@ -68,6 +77,7 @@ public class Game extends AbstractActor {
                 .match(Start.class, start -> {
                         player = getContext().actorOf(Player.props(), "player");
                         bulletMananger = getContext().actorOf(BulletManager.props(), "bulletmanager");
+                        alienManager = getContext().actorOf(AlienManager.props(bulletMananger), "alienmanager");
                         log.info("Game started!");
                         getContext().become(getPlaying());
                 })
@@ -79,12 +89,14 @@ public class Game extends AbstractActor {
                 .match(Tick.class, tick -> {
                     guiActor.tell(new GameStateDto(GameStateDto.State.Playing, playerDto, bullets, aliens), getSelf());
                     bulletMananger.tell(tick, getSelf());
+                    alienManager.tell(tick, getSelf());
                 })
                 .match(MoveLeft.class, ml -> player.tell(ml, getSelf()))
                 .match(MoveRight.class, mr -> player.tell(mr, getSelf()))
                 .match(PlayerDto.class, playerDto -> this.playerDto = playerDto)
                 .match(Fire.class, fire -> player.tell(new Player.Fire(bulletMananger), getSelf()))
                 .match(Bullets.class, bullets -> this.bullets = bullets.bullets)
+                .match(Aliens.class, aliens -> this.aliens = aliens.aliens)
                 .build();
     }
 

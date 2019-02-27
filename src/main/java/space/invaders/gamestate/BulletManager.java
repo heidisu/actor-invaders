@@ -33,7 +33,8 @@ public class BulletManager extends AbstractActor {
     public Receive createReceive() {
         return receiveBuilder()
                 .match(CreateBullet.class, cb -> {
-                    ActorRef bullet =  getContext().actorOf(Bullet.props(nextId, cb.posX, cb.posY), "bullet-" + nextId);
+                    Bullet.Type type =  context().sender().path().name().equals("player") ? Bullet.Type.Player : Bullet.Type.Alien;
+                    ActorRef bullet =  getContext().actorOf(Bullet.props(type, nextId, cb.posX, cb.posY), "bullet-" + nextId);
                     getContext().watch(bullet);
                     bulletRefs.add(bullet);
                     nextId ++;
