@@ -2,10 +2,11 @@
 
 ![](img/game.gif)
 
-In this workshop we will gradually complete the actors necessary to make the Space Invaders game work. The GUI part is already there, but it isn't doing anything yet. Our task will be to finish the game logic which uses a hierarchy of actors to manage updates and keep track of its state.
+In this workshop we will complete a simplyfied version of the classic game Space Invader, as shown above. While we are making the game work, you will get experience with how Akka actors work, their lifecycle, how to change their behaviour, and different ways to send messages to other actors.
+
+The GUI part is already there, but it isn't doing anything yet, our task will be to finish the game logic which uses a hierarchy of actors to manage updates and keep track of the game state.
 
 ![The actor hierarchy](img/actor-hierarchy.png "The actor hierarchy")
-
 
 The game loop is driven by a scheduled message `Tick` which is sent to the main `Game`actor 20 times pr second, and `Game`'s main task is to send a `GameStateDto`to the `GUI`.
 
@@ -13,9 +14,11 @@ There are probably many ways to organize the actors and still get a working game
 
 `GameStateDto` is an object that contains a complete view of the current state of the game, and the different parts of our actor hierarchy is responsible for providing different parts of it to the `Game` actor, which collects the parts and sends the total picture to the `GUI`actor.
 
-Communication between other actors mainly occurs between a parent and its children. This approach gives only one entry point between the gui and the game logic, which makes it is easy to have full control over when the game is active, or ended and all the moving parts have to stop. Also the aliens move in a synchronized way so they can act entirely on their own. 
+Communication between other actors mainly occurs between a parent and its children. This approach gives only one entry point between the gui and the game logic, which makes it easy to have full control over when the game is active, or ended and all the moving parts have to stop. The global `Tick`makes it easy handle speed, and also the aliens move in a synchronized way so they can act entirely on their own. 
 
 ![The message flow](img/message-flow.png "The flow of messages")
+
+Below are detailed instruction that gradually will make the game work. You can either follow them, or if you want, you can go more "free style" and make the actor system as you like, as long as the `GUI` actor receives the game state as specified in `GameStateDto` it should still work.
 
 ### The game objects
 
@@ -124,8 +127,7 @@ Now the `BulletManager` will receive `CreateBullet`messages from two different s
 * The `BulletManager` should then be responsible for creating a `Bullet` with the right properties. But how can it know which type of `Bullet`it should make? Again there are choices. The manager can use the name of the sender to deduce what `Bullet`it should make, or we can extend the `CreateBullet` message to contain information that can be used to decide. In the first case the `BulletManager`is in control of what kind of bullets it want to make, in the latter, the sender of the message controls the decision.
 
 ### In Game
-* Create the `ActorManager`
-* Send `Tick`also to the `ActorManager`
+In `Game`create the `ActorManager`, and send `Tick`also to the `ActorManager`.
 
 ## Task 5: it's a war!
 We are pretty close to something that behaves like a game!
