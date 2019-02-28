@@ -2,22 +2,23 @@
 
 ![](img/game.gif)
 
-In this workshop we will gradually complete the actors necessary to make the Space Invaders game work. The GUI part is already there, but it isn't doing anything yet. Our task will be to finish the game logic which uses a hierarchy of actors to manage updates and keep track of its state.
+In this workshop we will complete a simplyfied version of the classic game Space Invaders, as shown above. While we are making the game work, you will get experience with how Akka actors work, their lifecycle, how to change their behaviour, and different ways to send messages to other actors.
+
+The GUI part is already there, but it isn't doing anything yet, our task will be to finish the game logic which uses a hierarchy of actors to manage updates and keep track of the game state.
 
 ![The actor hierarchy](img/actor-hierarchy.png "The actor hierarchy")
 
-
 The game loop is driven by a scheduled message `Tick` which is sent to the main `Game`actor 20 times pr second, and `Game`'s main task is to send a `GameStateDto`to the `GUI`.
 
-There are probably many ways to organize the actors and still get a working game. We have chosen to have a quite clean communcation interface between the `GUI` and the `Game`; `GUI` can send `Start`, `MoveLeft`, `MoveRight` and `Fire` to `Game`, and game only sends `GameStateDto` to the `GUI`.
+There are probably many ways to organize the actors and still get a working game. We have chosen to have a quite clean communcation interface between the `GUI` and the `Game`; `GUI` can send `Start`, `MoveLeft`, `MoveRight` and `Fire` to `Game`, and `Game` only sends `GameStateDto` back to the `GUI`.
 
 `GameStateDto` is an object that contains a complete view of the current state of the game, and the different parts of our actor hierarchy is responsible for providing different parts of it to the `Game` actor, which collects the parts and sends the total picture to the `GUI`actor.
 
-Communication between other actors mainly occurs between a parent and its children. This approach gives only one entry point between the gui and the game logic, which makes it is easy to have full control over when the game is active, or ended and all the moving parts have to stop. Also the aliens move in a synchronized way so they can act entirely on their own. 
+Communication between other actors mainly occurs between a parent and its children. This approach gives only one entry point between the gui and the game logic, which makes it easy to have full control over when the game is active, or ended and all the moving parts have to stop. The global `Tick`makes it easy handle speed, and also the aliens move in a synchronized way so they can act entirely on their own. 
 
 ![The message flow](img/message-flow.png "The flow of messages")
 
-### The game objects
+Below are detailed instruction that gradually will make the game work. You can either follow them, or if you want, you can go more "free style" and make the actor system as you like, as long as the `GUI` actor receives the game state as specified in `GameStateDto` it should still work.
 
 ## Task 1: Let the game begin
 The actor `Game` is the main actor. It will receive messages from the `GUI` actor and from the message scehduler, and create and organize actors for handling the player, the aliens, and the bullets, and send new game state back to the `GUI`.
@@ -110,7 +111,7 @@ The `AlienManager` has some similarities with the `BulletManager`, it creates al
 * Make a constructor and static `props` method. Both should take an `ActorRef` for the `BulletManager` as argument.
 * The grid of aliens can be initialized in the constructor
   * Use for instance a double for loop, and add actorRefs to the manager's grid variable and the alienRef list.
-  * Use the three different images sets defined in `AlienImageSet`.
+  * Use the three different image sets defined in `AlienImageSet`.
   * The aliens should be watched by the manager
 * The manager should respond to messages of type `Tick`, `AlienDto`and `Terminated`
   * On `Tick`it should decide if it want to fire a random bullet. Perhaps nice to have a separate method for firing the bullet, and the method should randomly choose one of the lowermost aliens from each column (if the column still has aliens left), and tell the selected `Alien` to `Fire`. You probably don't want to fire a bullet at every `Tick`, then it feels like it's raining bullets. 
@@ -123,12 +124,17 @@ Now the `BulletManager` will receive `CreateBullet`messages from two different s
 * Decide what you want to do with the `Bullet`actor in order to create bullets of these two kinds. Maybe you want to make it into an abstract base class with two sub classes, one for each bullet type, or maybe just separate the different logic inside the same class, or something else. The style for the alien bullets should be `alien-bullet`.
 * The `BulletManager` should then be responsible for creating a `Bullet` with the right properties. But how can it know which type of `Bullet`it should make? Again there are choices. The manager can use the name of the sender to deduce what `Bullet`it should make, or we can extend the `CreateBullet` message to contain information that can be used to decide. In the first case the `BulletManager`is in control of what kind of bullets it want to make, in the latter, the sender of the message controls the decision.
 
-### In Game
-* Create the `ActorManager`
-* Send `Tick`also to the `ActorManager`
+### The Game
+In `Game`create the `ActorManager`, and send `Tick`also to the `ActorManager`.
 
 ## Task 5: it's a war!
-We are pretty close to something that behaves like a game!
+We are actually pretty close to something that behaves like a game! 
+
+The main remaining part is to detect when the player or the aliens are hit by bullets. If the player is hit it should loose a life, and if there is no lives left, the game is lost. When an alien is hit it should be removed, and if there are no aliens left the game is won. When a bullet hits something it should disappear from the screen.
+
+Obviously we need a way for the player and aliens to figure out when they are hit by bullets. The player and the aliens know their own widths and heights, so it is practical to let those entities decide if they are hit by a bullet or not. But we might not want the entities to keep a list of references to the bullets, which also are continously created and removed, or for a bullet to have a list of the entities, since these objects are not directly related in our actor hierarchy. But there is another way; the [Event Bus](https://doc.akka.io/docs/akka/current/event-bus.html). We will let the entities subscribe to bullets, and take the right action if they are hit. One can make a dedicated event bus, but we will just use the main bus for the actor system, the Event Stream.
+
+
 
 ## Bonus tasks
 
