@@ -124,11 +124,13 @@ Now the `BulletManager` will receive `CreateBullet`messages from two different s
 * Decide what you want to do with the `Bullet`actor in order to create bullets of these two kinds. Maybe you want to make it into an abstract base class with two sub classes, one for each bullet type, or maybe just separate the different logic inside the same class, or something else. The style for the alien bullets should be `alien-bullet`.
 * The `BulletManager` should then be responsible for creating a `Bullet` with the right properties. But how can it know which type of `Bullet`it should make? Again there are choices. The manager can use the name of the sender to deduce what `Bullet`it should make, or we can extend the `CreateBullet` message to contain information that can be used to decide. In the first case the `BulletManager`is in control of what kind of bullets it want to make, in the latter, the sender of the message controls the decision.
 
-### In Game
+### The Game
 In `Game`create the `ActorManager`, and send `Tick`also to the `ActorManager`.
 
 ## Task 5: it's a war!
-We are pretty close to something that behaves like a game!
+We are actually pretty close to something that behaves like a game! The main remaining part is to detect when the player or the aliens are hit by bullets. 
+If the player is hit it should loose a life, and if there is no lives left, the game is lost. When an alien is hit it should be removed, and if there are no aliens left the game is won. When a bullet hits something it should disappear from the screen.
+Obviously we need a way for the player and aliens to figure out when they are hit by bullets. The player and the aliens know their own widths and heights, so it is practical to let those entities decide if they are hit by a bullet or not. But we might not want the entities to keep a list of references to the bullets, which also are continously created and removed, or for a bullet to have a list of the entities, since these objects are not directly related in our actor hierarchy. But there is another way; the [Event Bus](https://doc.akka.io/docs/akka/current/event-bus.html). We will let the entities subscribe to bullets, and take the right action if they are hit.
 
 ## Bonus tasks
 
