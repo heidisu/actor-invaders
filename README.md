@@ -2,7 +2,7 @@
 
 ![](img/game.gif)
 
-In this workshop we will complete a simplyfied version of the classic game Space Invader, as shown above. While we are making the game work, you will get experience with how Akka actors work, their lifecycle, how to change their behaviour, and different ways to send messages to other actors.
+In this workshop we will complete a simplyfied version of the classic game Space Invaders, as shown above. While we are making the game work, you will get experience with how Akka actors work, their lifecycle, how to change their behaviour, and different ways to send messages to other actors.
 
 The GUI part is already there, but it isn't doing anything yet, our task will be to finish the game logic which uses a hierarchy of actors to manage updates and keep track of the game state.
 
@@ -10,7 +10,7 @@ The GUI part is already there, but it isn't doing anything yet, our task will be
 
 The game loop is driven by a scheduled message `Tick` which is sent to the main `Game`actor 20 times pr second, and `Game`'s main task is to send a `GameStateDto`to the `GUI`.
 
-There are probably many ways to organize the actors and still get a working game. We have chosen to have a quite clean communcation interface between the `GUI` and the `Game`; `GUI` can send `Start`, `MoveLeft`, `MoveRight` and `Fire` to `Game`, and game only sends `GameStateDto` to the `GUI`.
+There are probably many ways to organize the actors and still get a working game. We have chosen to have a quite clean communcation interface between the `GUI` and the `Game`; `GUI` can send `Start`, `MoveLeft`, `MoveRight` and `Fire` to `Game`, and `Game` only sends `GameStateDto` back to the `GUI`.
 
 `GameStateDto` is an object that contains a complete view of the current state of the game, and the different parts of our actor hierarchy is responsible for providing different parts of it to the `Game` actor, which collects the parts and sends the total picture to the `GUI`actor.
 
@@ -19,8 +19,6 @@ Communication between other actors mainly occurs between a parent and its childr
 ![The message flow](img/message-flow.png "The flow of messages")
 
 Below are detailed instruction that gradually will make the game work. You can either follow them, or if you want, you can go more "free style" and make the actor system as you like, as long as the `GUI` actor receives the game state as specified in `GameStateDto` it should still work.
-
-### The game objects
 
 ## Task 1: Let the game begin
 The actor `Game` is the main actor. It will receive messages from the `GUI` actor and from the message scehduler, and create and organize actors for handling the player, the aliens, and the bullets, and send new game state back to the `GUI`.
