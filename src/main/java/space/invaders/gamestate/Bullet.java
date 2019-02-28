@@ -16,19 +16,6 @@ public class Bullet extends AbstractActor {
     private final String style;
     private final Function<Integer, Integer> move;
 
-    private static Map<Type, String> typeToStyle = new HashMap<>();
-    static {
-        typeToStyle.put(Type.Player, "player-bullet");
-        typeToStyle.put(Type.Alien, "alien-bullet");
-    }
-
-    private static Map<Type, Function<Integer, Integer>> typeToMove = new HashMap<>();
-    static {
-        typeToMove.put(Type.Player, i -> i - 10);
-        typeToMove.put(Type.Alien, i -> i + 10);
-    }
-
-
     static Props props(Type type, int id, int posX, int posY){
         return Props.create(Bullet.class, () -> new Bullet(type, id, posX, posY));
     }
@@ -39,8 +26,8 @@ public class Bullet extends AbstractActor {
     }
 
     public Bullet(Type type, int id, int posX, int posY) {
-        this.style = typeToStyle.get(type);
-        this.move = typeToMove.get(type);
+        this.style = type == Type.Player ? "player-bullet" : "alien-bullet";
+        this.move = type == Type.Player ? i -> i - 10 : i -> i + 10;
         this.id = id;
         this.posX = posX;
         this.posY = posY;
