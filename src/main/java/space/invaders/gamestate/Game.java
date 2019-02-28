@@ -76,6 +76,7 @@ public class Game extends AbstractActor {
         return receiveBuilder()
                 .match(Start.class, start -> {
                         player = getContext().actorOf(Player.props(), "player");
+                        getContext().getSystem().getEventStream().subscribe(player, Events.AlienBulletMoved.class);
                         bulletMananger = getContext().actorOf(BulletManager.props(), "bulletmanager");
                         alienManager = getContext().actorOf(AlienManager.props(bulletMananger), "alienmanager");
                         log.info("Game started!");
@@ -93,11 +94,28 @@ public class Game extends AbstractActor {
                 })
                 .match(MoveLeft.class, ml -> player.tell(ml, getSelf()))
                 .match(MoveRight.class, mr -> player.tell(mr, getSelf()))
-                .match(PlayerDto.class, playerDto -> this.playerDto = playerDto)
+                .match(PlayerDto.class, playerDto -> {
+                    this.playerDto = playerDto;
+                    if(playerDto.lives == 0){
+                        guiActor.tell(new GameStateDto(GameStateDto.State.GameLost, playerDto, bullets, aliens), getSelf());
+                        getContext().become(getGameOver());
+                    }
+                })
                 .match(Fire.class, fire -> player.tell(new Player.Fire(bulletMananger), getSelf()))
                 .match(Bullets.class, bullets -> this.bullets = bullets.bullets)
-                .match(Aliens.class, aliens -> this.aliens = aliens.aliens)
+                .match(Aliens.class, aliens -> {
+                    var noMoreAliens = !this.aliens.isEmpty() && aliens.aliens.isEmpty();
+                    this.aliens = aliens.aliens;
+                    if(noMoreAliens){
+                        guiActor.tell(new GameStateDto(GameStateDto.State.GameWon, playerDto, bullets, this.aliens), getSelf());
+                        getContext().become(getGameOver());
+                    }
+                })
                 .build();
+    }
+
+    private Receive getGameOver() {
+        return receiveBuilder().build();
     }
 
     @Override

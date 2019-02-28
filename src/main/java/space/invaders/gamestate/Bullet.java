@@ -1,12 +1,12 @@
 package space.invaders.gamestate;
 
 import akka.actor.AbstractActor;
+import akka.actor.ActorRef;
 import akka.actor.Props;
 import space.invaders.dto.BulletDto;
 import space.invaders.dto.GameStateDto;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public class Bullet extends AbstractActor {
@@ -15,19 +15,7 @@ public class Bullet extends AbstractActor {
     private int posY;
     private final String style;
     private final Function<Integer, Integer> move;
-
-    private static Map<Type, String> typeToStyle = new HashMap<>();
-    static {
-        typeToStyle.put(Type.Player, "player-bullet");
-        typeToStyle.put(Type.Alien, "alien-bullet");
-    }
-
-    private static Map<Type, Function<Integer, Integer>> typeToMove = new HashMap<>();
-    static {
-        typeToMove.put(Type.Player, i -> i - 10);
-        typeToMove.put(Type.Alien, i -> i + 10);
-    }
-
+    private final BiFunction<ActorRef, BulletDto, Events.BulletMoved> createEvent;
 
     static Props props(Type type, int id, int posX, int posY){
         return Props.create(Bullet.class, () -> new Bullet(type, id, posX, posY));
@@ -39,8 +27,9 @@ public class Bullet extends AbstractActor {
     }
 
     public Bullet(Type type, int id, int posX, int posY) {
-        this.style = typeToStyle.get(type);
-        this.move = typeToMove.get(type);
+        style = type == Type.Player ? "player-bullet" : "alien-bullet";
+        move = type == Type.Player ? i -> i - 10 :  i -> i + 10;
+        createEvent = type == Type.Player ? Events.PlayerBulletMoved::new : Events.AlienBulletMoved::new;
         this.id = id;
         this.posX = posX;
         this.posY = posY;
@@ -55,7 +44,9 @@ public class Bullet extends AbstractActor {
                         getContext().stop(getSelf());
                     }
                     else {
-                        getContext().getParent().tell(new BulletDto(id, posX, posY, style), getSelf());
+                        var bulletDto = new BulletDto(id, posX, posY, style);
+                        getContext().getParent().tell(bulletDto, getSelf());
+                        getContext().getSystem().getEventStream().publish(createEvent.apply(getSelf(), bulletDto));
                     }
                 })
                 .build();

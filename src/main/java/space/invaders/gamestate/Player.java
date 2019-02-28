@@ -56,7 +56,18 @@ public class Player extends AbstractActor {
                 .match(Fire.class, fire -> {
                     fire.bulletManager.tell(new BulletManager.CreateBullet(posX + width/2, posY), getSelf());
                 })
+                .match(Events.AlienBulletMoved.class, bm -> {
+                    if (isHit(bm.bulletDto.posX, bm.bulletDto.posY)){
+                        lives --;
+                        context().stop(bm.bulletActor);
+                        context().parent().tell(getPlayerDto(), self());
+                    }
+                })
                 .build();
+    }
+
+    private boolean isHit(int posX, int posY) {
+        return posX >= this.posX && posX <= this.posX + width && posY >= this.posY + height / 3 && posY <= this.posY + height;
     }
 
     private PlayerDto getPlayerDto() {
