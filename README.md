@@ -128,9 +128,13 @@ Now the `BulletManager` will receive `CreateBullet`messages from two different s
 In `Game`create the `ActorManager`, and send `Tick`also to the `ActorManager`.
 
 ## Task 5: it's a war!
-We are actually pretty close to something that behaves like a game! The main remaining part is to detect when the player or the aliens are hit by bullets. 
-If the player is hit it should loose a life, and if there is no lives left, the game is lost. When an alien is hit it should be removed, and if there are no aliens left the game is won. When a bullet hits something it should disappear from the screen.
-Obviously we need a way for the player and aliens to figure out when they are hit by bullets. The player and the aliens know their own widths and heights, so it is practical to let those entities decide if they are hit by a bullet or not. But we might not want the entities to keep a list of references to the bullets, which also are continously created and removed, or for a bullet to have a list of the entities, since these objects are not directly related in our actor hierarchy. But there is another way; the [Event Bus](https://doc.akka.io/docs/akka/current/event-bus.html). We will let the entities subscribe to bullets, and take the right action if they are hit.
+We are actually pretty close to something that behaves like a game! 
+
+The main remaining part is to detect when the player or the aliens are hit by bullets. If the player is hit it should loose a life, and if there is no lives left, the game is lost. When an alien is hit it should be removed, and if there are no aliens left the game is won. When a bullet hits something it should disappear from the screen.
+
+Obviously we need a way for the player and aliens to figure out when they are hit by bullets. The player and the aliens know their own widths and heights, so it is practical to let those entities decide if they are hit by a bullet or not. But we might not want the entities to keep a list of references to the bullets, which also are continously created and removed, or for a bullet to have a list of the entities, since these objects are not directly related in our actor hierarchy. But there is another way; the [Event Bus](https://doc.akka.io/docs/akka/current/event-bus.html). We will let the entities subscribe to bullets, and take the right action if they are hit. One can make a dedicated event bus, but we will just use the main bus for the actor system, the Event Stream.
+
+
 
 ## Bonus tasks
 
