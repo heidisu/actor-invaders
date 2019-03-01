@@ -20,6 +20,18 @@ Communication between other actors mainly occurs between a parent and its childr
 
 Below are detailed instruction that gradually will make the game work. You can either follow them, or if you want, you can go more "free style" and make the actor system as you like, as long as the `GUI` actor receives the game state as specified in `GameStateDto` it should still work.
 
+## Getting started
+To do this workshop you should have the following installed on your computer:
+* [Java JDK](https://www.oracle.com/technetwork/java/javase/downloads/index.html) version >= 8
+* [Maven](https://maven.apache.org/)
+* A nice editor, like [IntelliJ](https://www.jetbrains.com/idea/)
+
+Clone this repo, and open the project in your editor. The editor probably knows how to run the project from the main class `App.java`. The code can also be build and run from command line with
+```
+mvn clean install
+java -jar target/actor-invaders-1.0-SNAPSHOT-uber.jar
+```
+
 ## Task 1: Let the game begin
 The actor `Game` is the main actor. It will receive messages from the `GUI` actor and from the message scehduler, and create and organize actors for handling the player, the aliens, and the bullets, and send new game state back to the `GUI`.
 Initially `Game` has five message types; `Tick`, `Start`, `Fire`, `MoveLeft` and `MoveRight`. (We will add more later, and it will receive DTO objects as messages) 
