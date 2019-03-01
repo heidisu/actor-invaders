@@ -27,19 +27,19 @@ public class AlienManager extends AbstractActor {
     public AlienManager(ActorRef bulletManager) {
         this.bulletManager = bulletManager;
         int id = 1;
-        var posY = 20;
+        int posY = 20;
         for (int j = 0; j < rows; j++) {
-            var image = AlienImageSet.images.get(j % AlienImageSet.images.size());
+            AlienImageSet imageSet = AlienImageSet.images.get(j % AlienImageSet.images.size());
             for (int i = 0; i < columns; i++) {
-                var posX = 10 + 60 * i;
-                var alien = context().actorOf(Alien.props(id, posX, posY, image), "alien-" + id);
+                int posX = 10 + 60 * i;
+                ActorRef alien = context().actorOf(Alien.props(id, posX, posY, imageSet), "alien-" + id);
                 getContext().getSystem().getEventStream().subscribe(alien, Events.PlayerBulletMoved.class);
                 context().watch(alien);
                 alienRefs.add(alien);
                 alienGrid[i][j] = alien;
                 id++;
             }
-            posY = posY + image.height + 20;
+            posY = posY + imageSet.height + 20;
         }
     }
 
@@ -65,22 +65,22 @@ public class AlienManager extends AbstractActor {
         }
         else {
             fireBulletCounter = 0;
-            var nonEmptyColumns =
+            List<Integer> nonEmptyColumns =
                     IntStream
                             .range(0, columns)
                             .filter(i -> alienGrid[i][rows - 1] != null)
                             .boxed()
                             .collect(Collectors.toList());
-            var idx = random.nextInt(nonEmptyColumns.size());
-            var col = nonEmptyColumns.get(idx);
-            var maxRow = 0;
+            int idx = random.nextInt(nonEmptyColumns.size());
+            int col = nonEmptyColumns.get(idx);
+            int maxRow = 0;
             for (int j = 3; j >= 0; j--) {
                 if (alienGrid[col][j] != null) {
                     maxRow = j;
                     break;
                 }
             }
-            var actor = alienGrid[col][maxRow];
+            ActorRef actor = alienGrid[col][maxRow];
             actor.tell(new Alien.Fire(bulletManager), self());
         }
     }

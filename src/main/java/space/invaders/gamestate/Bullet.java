@@ -44,7 +44,7 @@ public class Bullet extends AbstractActor {
                         getContext().stop(getSelf());
                     }
                     else {
-                        var bulletDto = new BulletDto(id, posX, posY, style);
+                        BulletDto bulletDto = new BulletDto(id, posX, posY, style);
                         getContext().getParent().tell(bulletDto, getSelf());
                         getContext().getSystem().getEventStream().publish(createEvent.apply(getSelf(), bulletDto));
                     }

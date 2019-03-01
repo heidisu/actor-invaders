@@ -134,7 +134,16 @@ The main remaining part is to detect when the player or the aliens are hit by bu
 
 Obviously we need a way for the player and aliens to figure out when they are hit by bullets. The player and the aliens know their own widths and heights, so it is practical to let those entities decide if they are hit by a bullet or not. But we might not want the entities to keep a list of references to the bullets, which also are continously created and removed, or for a bullet to have a list of the entities, since these objects are not directly related in our actor hierarchy. But there is another way; the [Event Bus](https://doc.akka.io/docs/akka/current/event-bus.html). We will let the entities subscribe to bullets, and take the right action if they are hit. One can make a dedicated event bus, but we will just use the main bus for the actor system, the Event Stream.
 
+In the class `Events` there are two events, one for when an bullet fired from an alien, and one for when a bullet is fired from the player. We will let the player subscribe to `AlienBulletMoved` and aliens subscribe to `PlayerBulletMoved`
 
+* Start by making bullets publish the right message on the event stream each time they move. It is done my invoking `context().system().eventStream().publish()`. Messages published on the event stream does not have its original sender, that is why the actorRef for the bullet is included in the messsage.
+* When the `Player` is created, it should also start to subscribe for `AlienBulletMoved` messages, and have a match clause for such messages in its receive builder. If the position of the `BulletDto` is within the area occupied by the player, the player should loose one life, and also stop the bullet actor. 
+* Similar with the aliens. They should subscribe to the `PlayerBulletMoved` message, and stop both itself and the bullet when it is hit by the bullet. 
+* Now we only have to update the state in `Game`. We should update the gui with state gameWon if there are noe aliens left, and similar gameLost if `Game`receives a `PlayerDto`with no lives left. You can choose if you want the logic for this in `Game`or if you want the `Player` and `AlienManager` tell the `Game` when those things happen. To make everthing stop when the game is either won or lost, we can make a new reiceve method for game over, and then let the `Game` become game over.
+
+<p align="center">
+  <b>Congratulations! You did it!</b>
+ </p>
 
 ## Bonus tasks
 

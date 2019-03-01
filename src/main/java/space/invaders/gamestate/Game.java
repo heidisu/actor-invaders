@@ -11,7 +11,6 @@ import space.invaders.dto.GameStateDto;
 import space.invaders.dto.PlayerDto;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 public class Game extends AbstractActor {
@@ -104,7 +103,7 @@ public class Game extends AbstractActor {
                 .match(Fire.class, fire -> player.tell(new Player.Fire(bulletMananger), getSelf()))
                 .match(Bullets.class, bullets -> this.bullets = bullets.bullets)
                 .match(Aliens.class, aliens -> {
-                    var noMoreAliens = !this.aliens.isEmpty() && aliens.aliens.isEmpty();
+                    boolean noMoreAliens = !this.aliens.isEmpty() && aliens.aliens.isEmpty();
                     this.aliens = aliens.aliens;
                     if(noMoreAliens){
                         guiActor.tell(new GameStateDto(GameStateDto.State.GameWon, playerDto, bullets, this.aliens), getSelf());
