@@ -154,7 +154,7 @@ In the class `Events` there are two events, one for when an bullet fired from an
 * Now we only have to update the state in `Game`. We should update the gui with state gameWon if there are noe aliens left, and similar gameLost if `Game`receives a `PlayerDto`with no lives left. You can choose if you want the logic for this in `Game`or if you want the `Player` and `AlienManager` tell the `Game` when those things happen. To make everthing stop when the game is either won or lost, we can make a new reiceve method for game over, and then let the `Game` become game over.
 
 <p align="center">
-  <b>Congratulations! You did it!</b>
+  :tada: <b>Congratulations! You did it!</b> :tada:
  </p>
 
 ## Bonus tasks
