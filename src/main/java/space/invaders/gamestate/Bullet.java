@@ -13,23 +13,18 @@ public class Bullet extends AbstractActor {
     private /*final*/ int id;
     private /*final*/ int posX;
     private int posY;
-    private final String style;
+    private final BulletDto.Type type;
     private final Function<Integer, Integer> move;
     private final BiFunction<ActorRef, BulletDto, Events.BulletMoved> createEvent;
 
-    static Props props(Type type, int id, int posX, int posY){
+    static Props props(BulletDto.Type type, int id, int posX, int posY){
         return Props.create(Bullet.class, () -> new Bullet(type, id, posX, posY));
     }
 
-    public enum Type {
-        Player,
-        Alien
-    }
-
-    public Bullet(Type type, int id, int posX, int posY) {
-        style = type == Type.Player ? "player-bullet" : "alien-bullet";
-        move = type == Type.Player ? i -> i - 10 :  i -> i + 10;
-        createEvent = type == Type.Player ? Events.PlayerBulletMoved::new : Events.AlienBulletMoved::new;
+    public Bullet(BulletDto.Type type, int id, int posX, int posY) {
+        this.type = type;
+        this.move = type == BulletDto.Type.Player ? i -> i - 10 : i -> i + 10;
+        createEvent = type == BulletDto.Type.Player ? Events.PlayerBulletMoved::new : Events.AlienBulletMoved::new;
         this.id = id;
         this.posX = posX;
         this.posY = posY;
@@ -44,7 +39,7 @@ public class Bullet extends AbstractActor {
                         getContext().stop(getSelf());
                     }
                     else {
-                        BulletDto bulletDto = new BulletDto(id, posX, posY, style);
+                        BulletDto bulletDto = new BulletDto(id, posX, posY, type);
                         getContext().getParent().tell(bulletDto, getSelf());
                         getContext().getSystem().getEventStream().publish(createEvent.apply(getSelf(), bulletDto));
                     }
