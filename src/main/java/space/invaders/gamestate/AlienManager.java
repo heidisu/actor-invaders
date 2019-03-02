@@ -6,12 +6,14 @@ import akka.actor.Props;
 import akka.actor.Terminated;
 import space.invaders.dto.AlienDto;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class AlienManager extends AbstractActor {
-    private Set<ActorRef> alienRefs = new HashSet<>();
     private Map<ActorRef, AlienDto> refToAlien = new HashMap<>();
     private final int columns = 10;
     private final int rows = 4;
@@ -34,7 +36,6 @@ public class AlienManager extends AbstractActor {
                 int posX = 10 + 60 * i;
                 ActorRef alien = context().actorOf(Alien.props(id, posX, posY, imageSet), "alien-" + id);
                 context().watch(alien);
-                alienRefs.add(alien);
                 alienGrid[i][j] = alien;
                 id++;
             }
@@ -47,7 +48,7 @@ public class AlienManager extends AbstractActor {
         return receiveBuilder()
                 .match(Game.Tick.class, tick -> {
                     fireRandomBullet();
-                    alienRefs.parallelStream().forEach(alien -> alien.tell(tick, getSelf()));
+                    getContext().getChildren().forEach(alien -> alien.tell(tick, getSelf()));
                     getContext().getParent().tell(new Game.Aliens(List.copyOf(refToAlien.values())), getSelf());
                 })
                 .match(AlienDto.class, alienDto -> refToAlien.put(getSender(), alienDto))
