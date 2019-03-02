@@ -20,6 +20,18 @@ Communication between other actors mainly occurs between a parent and its childr
 
 Below are detailed instruction that gradually will make the game work. You can either follow them, or if you want, you can go more "free style" and make the actor system as you like, as long as the `GUI` actor receives the game state as specified in `GameStateDto` it should still work.
 
+## Getting started
+To do this workshop you should have the following installed on your computer:
+* [Java JDK](https://www.oracle.com/technetwork/java/javase/downloads/index.html) version >= 8
+* [Maven](https://maven.apache.org/)
+* A nice editor, like [IntelliJ](https://www.jetbrains.com/idea/)
+
+Clone this repo, and open the project in your editor. The editor probably knows how to run the project from the main class `App.java`. The code can also be build and run from command line with
+```
+mvn clean install
+java -jar target/actor-invaders-1.0-SNAPSHOT-uber.jar
+```
+
 ## Task 1: Let the game begin
 The actor `Game` is the main actor. It will receive messages from the `GUI` actor and from the message scehduler, and create and organize actors for handling the player, the aliens, and the bullets, and send new game state back to the `GUI`.
 Initially `Game` has five message types; `Tick`, `Start`, `Fire`, `MoveLeft` and `MoveRight`. (We will add more later, and it will receive DTO objects as messages) 
@@ -142,7 +154,7 @@ In the class `Events` there are two events, one for when an bullet fired from an
 * Now we only have to update the state in `Game`. We should update the gui with state gameWon if there are noe aliens left, and similar gameLost if `Game`receives a `PlayerDto`with no lives left. You can choose if you want the logic for this in `Game`or if you want the `Player` and `AlienManager` tell the `Game` when those things happen. To make everthing stop when the game is either won or lost, we can make a new reiceve method for game over, and then let the `Game` become game over.
 
 <p align="center">
-  <b>Congratulations! You did it!</b>
+  :tada: <b>Congratulations! You did it!</b> :tada:
  </p>
 
 ## Bonus tasks
