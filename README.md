@@ -2,7 +2,7 @@
 
 ![](img/game.gif)
 
-In this workshop we will complete a simplyfied version of the classic game Space Invaders, as shown above. While we are making the game work, you will get experience with how Akka actors work, their lifecycle, how to change their behaviour, and different ways to send messages to other actors.
+In this workshop we will complete a simplified version of the classic game Space Invaders, as shown above. While we are making the game work, you will get experience with how Akka actors work, their lifecycle, how to change their behaviour, and different ways to send messages to other actors.
 
 The GUI part is already there, but it isn't doing anything yet, our task will be to finish the game logic which uses a hierarchy of actors to manage updates and keep track of the game state.
 
@@ -22,15 +22,18 @@ Below are detailed instruction that gradually will make the game work. You can e
 
 ## Getting started
 To do this workshop you should have the following installed on your computer:
-* [Java JDK](https://www.oracle.com/technetwork/java/javase/downloads/index.html) version >= 8
+* [Java JDK](https://www.oracle.com/technetwork/java/javase/downloads/index.html) version >= 9
+  * If you use OpenJDK of version >= 11, the gui library JavaFX is no longer included, and a separate dependency must be added to the `pom.xml`, take a look at the [required change](https://github.com/heidisu/actor-invaders/commit/6f3cba41e00c7143de940a40cd4c4d82a35da514) in the `java-11` branch.
 * [Maven](https://maven.apache.org/)
 * A nice editor, like [IntelliJ](https://www.jetbrains.com/idea/)
 
-Clone this repo, and open the project in your editor. The editor probably knows how to run the project from the main class `App.java`. The code can also be build and run from command line with
+Clone (or download) this repo, and open the project in your editor. The editor probably knows how to run the project from the main class `App.java`. The code can also be build and run from command line with
 ```
 mvn clean install
 java -jar target/actor-invaders-1.0-SNAPSHOT-uber.jar
 ```
+
+If you see a black screen with a start button when running the application you are good to go!
 
 ## Task 1: Let the game begin
 The actor `Game` is the main actor. It will receive messages from the `GUI` actor and from the message scehduler, and create and organize actors for handling the player, the aliens, and the bullets, and send new game state back to the `GUI`.
@@ -40,7 +43,7 @@ The first message is the one that gets the game going. At every `Tick` the curre
 
 ![The different states of the Game](img/gamestate.png "The different states of the game")
 
-Instead of having conditionals and flags to decide wether the actor should react to the the different messages or not, it will be better to keep the states clean and separate from each other. For that we will use the [`become`](https://doc.akka.io/docs/akka/2.5/actors.html) functionality to move between the states.
+Instead of having conditionals and flags to decide whether the actor should react to the the different messages or not, it will be better to keep the states clean and separate from each other. For that we will use the [`become`](https://doc.akka.io/docs/akka/2.5/actors.html) functionality to move between the states.
 * Make two `Receive` objects in the `Game` actor, one for when the game has not yet started, and one for when the `Game` is playing, you can for instance call them `idle` and `playing`.
 * The idle `Recieve` should only react to `Start` messages, and when it receive such a message it should create the `Player` actor, and then become the playing `Receive`.
   * The player actor can be created by`getContext().actorOf(Player.props(), "player")` You are in the context on the `Game` actor, so the player actor will be a child of the `Game` actor, with the name "player". 
