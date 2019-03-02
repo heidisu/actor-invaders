@@ -79,7 +79,7 @@ The `Bullet`actor has three private field; an `id`, and the position `posX` and 
 * In the receive builder we will match for the `Tick`message.
   * Update the `posY`of the `Bullet`. Again, pick a suitable number, 10 might be the number.
   * If `posY`is outside the screen, we will stop the bullet. There are [several ways of stopping](https://doc.akka.io/docs/akka/2.5/actors.html#stopping-actors) an actor, depending on the what needs to be done when an actor stops. We can just go for the simple `getContext().stop(getSelf())`.
-  * Otherwise, if the bullet it not outside the screen, we should create a `BulletDto` and tell that back to the sender (which should be the same as the parent). You need the style for the bullets from the player, which is `player-bullet`.
+  * Otherwise, if the bullet it not outside the screen, we should create a `BulletDto` and tell that back to the sender (which should be the same as the parent). The type for this bullet is `BulletDto.Type.Player`.
 
 ### The BulletManager
 The `BulletManager` will create new bullets and keep track of the `BulletDto` it receives. On every tick it will send the tick further down to each bullet, and send the current list of `BulletDto`s back to `Game`. Note that the manager will not need to wait for the bullets to update their position before it sends the list of dtos back to the `Game`. It just happily send the current situation, so the updates from the `Bullet`actors will take effect in a later tick.
@@ -136,8 +136,8 @@ The `AlienManager` has some similarities with the `BulletManager`, it creates al
   * When `Terminated`is recieved, the dead alien should be removed from all the places it is kept in local variables.
 
 ### The Bullet and the BulletManager
-Now the `BulletManager` will receive `CreateBullet`messages from two different senders; from the `Player`and from the `AlienManager`. It therefore needs to create two different kinds of bullets, one with the player style and which are moving upwards, and one with alien style which is mowing downwards. 
-* Decide what you want to do with the `Bullet`actor in order to create bullets of these two kinds. Maybe you want to make it into an abstract base class with two sub classes, one for each bullet type, or maybe just separate the different logic inside the same class, or something else. The style for the alien bullets should be `alien-bullet`.
+Now the `BulletManager` will receive `CreateBullet`messages from two different senders; from the `Player`and from the `AlienManager`. It therefore needs to create two different kinds of bullets, one of type player which are moving upwards, and one of type alien which is mowing downwards. 
+* Decide what you want to do with the `Bullet`actor in order to create bullets of these two kinds. Maybe you want to make it into an abstract base class with two sub classes, one for each bullet type, or maybe just separate the different logic inside the same class by using the existing enum in `BulletDto`, or something else.
 * The `BulletManager` should then be responsible for creating a `Bullet` with the right properties. But how can it know which type of `Bullet`it should make? Again there are choices. The manager can use the name of the sender to deduce what `Bullet`it should make, or we can extend the `CreateBullet` message to contain information that can be used to decide. In the first case the `BulletManager`is in control of what kind of bullets it want to make, in the latter, the sender of the message controls the decision.
 
 ### The Game

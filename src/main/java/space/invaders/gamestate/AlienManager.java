@@ -11,7 +11,7 @@ public class AlienManager extends AbstractActor {
     private Map<ActorRef, AlienDto> refToAlien = new HashMap<>();
     private final int columns = 10;
     private final int rows = 4;
-    private ActorRef [][] alienGrid = new ActorRef [columns][rows];
+    private ActorRef [][] alienGrid = new ActorRef [rows][columns];
 
     @Override
     public Receive createReceive() {
