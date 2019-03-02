@@ -4,17 +4,22 @@ import java.io.Serializable;
 import java.util.Objects;
 
 public class BulletDto implements Serializable {
+    public static enum Type {
+        Player,
+        Alien
+    }
+
     public final int id;
     public final int posX;
     public final int posY;
-    public final String styleClass;
+    public final Type type;
 
 
-    public BulletDto(int id, int posX, int posY, String styleClass) {
+    public BulletDto(int id, int posX, int posY, Type type) {
         this.id = id;
         this.posX = posX;
         this.posY = posY;
-        this.styleClass = styleClass;
+        this.type = type;
     }
 
     @Override
@@ -25,11 +30,11 @@ public class BulletDto implements Serializable {
         return id == bulletDto.id &&
                 posX == bulletDto.posX &&
                 posY == bulletDto.posY &&
-                styleClass.equals(bulletDto.styleClass);
+                type.equals(bulletDto.type);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, posX, posY, styleClass);
+        return Objects.hash(id, posX, posY, type);
     }
 }
