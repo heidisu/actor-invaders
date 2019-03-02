@@ -17,7 +17,7 @@ public class AlienManager extends AbstractActor {
     private Map<ActorRef, AlienDto> refToAlien = new HashMap<>();
     private final int columns = 10;
     private final int rows = 4;
-    private ActorRef [][] alienGrid = new ActorRef [columns][rows];
+    private ActorRef [][] alienGrid = new ActorRef [rows][columns];
     private final ActorRef bulletManager;
     private int fireBulletCounter = 0;
     private Random random = new Random();
@@ -30,10 +30,10 @@ public class AlienManager extends AbstractActor {
         this.bulletManager = bulletManager;
         int id = 1;
         int posY = 20;
-        for (int j = 0; j < rows; j++) {
-            AlienImageSet imageSet = AlienImageSet.images.get(j % AlienImageSet.images.size());
-            for (int i = 0; i < columns; i++) {
-                int posX = 10 + 60 * i;
+        for (int i = 0; i < rows; i++) {
+            AlienImageSet imageSet = AlienImageSet.images.get(i % AlienImageSet.images.size());
+            for (int j = 0; j < columns; j++) {
+                int posX = 10 + 60 * j;
                 ActorRef alien = context().actorOf(Alien.props(id, posX, posY, imageSet), "alien-" + id);
                 getContext().getSystem().getEventStream().subscribe(alien, Events.PlayerBulletMoved.class);
                 context().watch(alien);
@@ -69,27 +69,27 @@ public class AlienManager extends AbstractActor {
             List<Integer> nonEmptyColumns =
                     IntStream
                             .range(0, columns)
-                            .filter(i -> alienGrid[i][rows - 1] != null)
+                            .filter(j -> alienGrid[rows - 1][j] != null)
                             .boxed()
                             .collect(Collectors.toList());
             int idx = random.nextInt(nonEmptyColumns.size());
             int col = nonEmptyColumns.get(idx);
             int maxRow = 0;
-            for (int j = 3; j >= 0; j--) {
-                if (alienGrid[col][j] != null) {
-                    maxRow = j;
+            for (int i = 3; i >= 0; i--) {
+                if (alienGrid[i][col] != null) {
+                    maxRow = i;
                     break;
                 }
             }
-            ActorRef actor = alienGrid[col][maxRow];
+            ActorRef actor = alienGrid[maxRow][col];
             actor.tell(new Alien.Fire(bulletManager), self());
         }
     }
 
     private void removeAlien(ActorRef deadAlien){
         refToAlien.remove(deadAlien);
-        for(int i = 0; i < columns; i++){
-            for(int j = 0; j < rows; j++){
+        for(int i = 0; i < rows; i++){
+            for(int j = 0; j < columns; j++){
                 if(alienGrid[i][j] == deadAlien){
                     alienGrid[i][j] = null;
                     return;
