@@ -6,11 +6,12 @@ import akka.actor.Props;
 import akka.actor.Terminated;
 import space.invaders.dto.BulletDto;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class BulletManager extends AbstractActor {
     private int nextId = 1;
-    private Set<ActorRef> bulletRefs = new HashSet<>();
     private Map<ActorRef, BulletDto> refToBullet = new HashMap<>();
 
     public static Props props(){
@@ -35,16 +36,14 @@ public class BulletManager extends AbstractActor {
                 .match(CreateBullet.class, cb -> {
                     ActorRef bullet =  getContext().actorOf(Bullet.props(nextId, cb.posX, cb.posY), "bullet-" + nextId);
                     getContext().watch(bullet);
-                    bulletRefs.add(bullet);
                     nextId ++;
                 })
                 .match(Game.Tick.class, tick -> {
-                    bulletRefs.stream().parallel().forEach(br -> br.tell(tick, getSelf()));
+                    getContext().getChildren().forEach(br -> br.tell(tick, getSelf()));
                     getContext().getParent().tell(new Game.Bullets(List.copyOf(refToBullet.values())), getSelf());
                 })
                 .match(BulletDto.class, bd -> refToBullet.put(getSender(), bd))
                 .match(Terminated.class, t -> {
-                    bulletRefs.remove(t.getActor());
                     refToBullet.remove(t.getActor());
                 })
                 .build();
