@@ -33,7 +33,7 @@ mvn clean install
 java -jar target/actor-invaders-1.0-SNAPSHOT-uber.jar
 ```
 
-If you see a black screen with a start button when running the application you are good to go!
+If you see a black screen with a start button when running the application, you are good to go!
 
 ## Task 1: Let the game begin
 The actor `Game` is the main actor. It will receive messages from the `GUI` actor and from the message scehduler, and create and organize actors for handling the player, the aliens, and the bullets, and send new game state back to the `GUI`.
