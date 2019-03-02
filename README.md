@@ -44,13 +44,14 @@ The first message is the one that gets the game going. At every `Tick` the curre
 ![The different states of the Game](img/gamestate.png "The different states of the game")
 
 Instead of having conditionals and flags to decide whether the actor should react to the the different messages or not, it will be better to keep the states clean and separate from each other. For that we will use the [`become`](https://doc.akka.io/docs/akka/2.5/actors.html) functionality to move between the states.
-* Make two `Receive` objects in the `Game` actor, one for when the game has not yet started, and one for when the `Game` is playing, you can for instance call them `idle` and `playing`.
+* In the `Game` actor make two methods that both return`Receive` objects, one for when the game has not yet started, and one for when the `Game` is playing, you can for instance call them `getIdle` and `getPlaying`.
+  * `Receive` objects is made with `receiveBuilder()`. Add a `.match()` for each message that should be received, and finally `.build()` to get the `Receive`.
 * The idle `Recieve` should only react to `Start` messages, and when it receive such a message it should create the `Player` actor, and then become the playing `Receive`.
   * The player actor can be created by`getContext().actorOf(Player.props(), "player")` You are in the context on the `Game` actor, so the player actor will be a child of the `Game` actor, with the name "player". 
   * You might want to save the player actorref in an instance variable so you have it for later
   * Maybe you also want to log that the game has started, so you really know. There is a `log` instance member use can use for that.
-  * Finally, the `Game` should move on to `playing` state. That is acheived with `getContext().become()`.
-* The second, `playing`, should *not* react to `Start`, but the other messages. 
+  * Finally, the `Game` should move on to playing state. That is acheived with `getContext().become()`.
+* The second, the playing `Receive`, should *not* react to `Start`, but the other messages. 
   * When it recieves `Tick`it should tell the `GameStateDto` to the gui actor. The way to tell something to an actor is to use the `tell` method on an `actorRef` like `guiActor.tell(new GameStateDto(...), getSelf()))`. The bullets and aliens can just be empty lists for the time being. The `playerDto`is available as an instance variable, but it is immutable and thus safe to give away, the state can be `GameStateDto.State.Playing`.
   * The messages `MoveLeft` and `MoveRight` can be told further to the `Player`, and we will work with the player in the next session. (We will come back to `Fire`later).
 * Make sure that the `createReceive()` method returns the receiver for the idle state.
