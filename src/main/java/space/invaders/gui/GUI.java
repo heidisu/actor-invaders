@@ -85,7 +85,7 @@ public class GUI extends AbstractActor {
         bullet.setCenterX(bulletDto.posX);
         bullet.setCenterY(bulletDto.posY);
         bullet.setRadius(2.0);
-        String style = bulletDto.type.equals(BulletDto.Type.Player) ? "player-bullet" : "alien-bullet";
+        String style = bulletDto.sender.equals(BulletDto.Sender.Player) ? "player-bullet" : "alien-bullet";
         bullet.getStyleClass().add(style);
         return bullet;
     }
@@ -148,6 +148,7 @@ public class GUI extends AbstractActor {
         stage.setTitle("Space invaders");
         changeScene(getStartScene());
         stage.setResizable(false);
+        stage.setOnCloseRequest(event -> System.exit(0));
         stage.show();
     }
 

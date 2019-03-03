@@ -67,7 +67,7 @@ The `Player`is the actor for the state of actual players's cannon in the game, a
 * We will need to be able to make a `PlayerDto` quite often, so we can probably just create a method that makes one, and returns it. There is already a constant `image` that can be used as argument to the `PlayerDto`s constructor.
 * In the constructor of the `Player` we should set the inital position for the cannon. A normal position would be in the middle, at the bottom of the screen. We should also immediately send a `PlayerDto`back to the `Game`. The `Player` actor is a child of `Game`, so we can use `getContext().parent()` to get hold of the `Game` actorRef.
 * In the `Player`'s `createReceive` add matches in the builder for the `Game.MoveLeft` and `Game.MoveRight` messages. In the action function in the match we should update `posX`. Experiment with what number you feel is a good speed, it can be 5. Maybe you also want to stop the player from moving outside the screen? A `PlayerDto` should also be sendt back to the `Game`.
-* In `Game` we should receive the `PlayerDto` and update the local variable.
+* In `Game` we should receive the `PlayerDto` and update the instance variable.
 * Start the game and see that you can move the player with the left and right arrows.
 
 ## Task 3: Firing bullets
@@ -101,7 +101,7 @@ The `Player`needs to responsible for firing its own bullets, also because the st
 ### Putting the pieces together
 Now we have most of the pieces ready to fire bullets, we only need to put the pieces together in the `Game` actor.
 * Create a `BulletManager`, and keep a reference for it. It can for instance be created when the `Start` message is received.
-* In the `playing` state of the actor, add a match for the `Fire` message. When this message is received, the actor should tell the `Player` the players fire message, where an reference to the `BulletManager` is added.
+* In the `playing` state of the actor, add a match for the `Fire` message. When this message is received, the actor should tell the `Player` the fire message we made in the `Player` class, where an reference to the `BulletManager` is added.
 * In the same state it should also add a match for its `Bullets` message. When it receives this it should keep the list of bullets inside the message. 
 * In the `Tick` match where the `GameStateDto` is sent to the `GUI`, the list of bullets in the previous step should be added. The `Tick`should also be sent down to the `BulletManager`.
 * Start the game and see that the player now can fire bullets by pushing space. Well done!
@@ -131,9 +131,9 @@ The `AlienManager` has some similarities with the `BulletManager`, it creates al
   * The aliens should be watched by the manager
 * The manager should respond to messages of type `Tick`, `AlienDto`and `Terminated`
   * On `Tick`it should decide if it want to fire a random bullet. Perhaps nice to have a separate method for firing the bullet, and the method should randomly choose one of the lowermost aliens from each column (if the column still has aliens left), and tell the selected `Alien` to `Fire`. You probably don't want to fire a bullet at every `Tick`, then it feels like it's raining bullets. 
-  * On `Tick`the manager should also tell all the aliens to tick, and send the `AlienDto`s back to the game, in `Game` we should add a corresponding match which save the aliens in the local `aliens` variable.
+  * On `Tick`the manager should also tell all the aliens to tick, and send the `AlienDto`s back to the game, in `Game` we should add a corresponding match which save the aliens in `Game`'s instance variable `aliens`.
   * When `AlienDto`is received, the manager should update the `refToAlien` map.
-  * When `Terminated`is recieved, the dead alien should be removed from all the places it is kept in local variables.
+  * When `Terminated`is recieved, the dead alien should be removed from all the places it is kept in instance variables.
 
 ### The Bullet and the BulletManager
 Now the `BulletManager` will receive `CreateBullet`messages from two different senders; from the `Player`and from the `AlienManager`. It therefore needs to create two different kinds of bullets, one of type player which are moving upwards, and one of type alien which is mowing downwards. 
