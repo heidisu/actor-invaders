@@ -17,10 +17,75 @@ public class Game extends AbstractActor {
     private final ActorRef guiActor;
     private final int width = GameStateDto.screenSize.width;
     private final int height = GameStateDto.screenSize.height;
+    private ActorRef bulletManager;
+    private ActorRef alienManager;
     private ActorRef player;
     private PlayerDto playerDto;
     private List<BulletDto> bullets = new ArrayList<>();
     private List<AlienDto> aliens = new ArrayList<>();
+
+    public static class Bullets {
+        public final List<BulletDto> bullets;
+
+        public Bullets(List<BulletDto> bullets) {
+            this.bullets = bullets;
+        }
+    }
+
+    public static class Aliens {
+        public final List<AlienDto> aliens;
+
+        public Aliens(List<AlienDto> aliens) {
+            this.aliens = aliens;
+        }
+    }
+
+    private Receive idle() {
+        return receiveBuilder()
+                .match(Start.class, s -> {
+                    player = getContext().actorOf(Player.props(), "player");
+                    bulletManager = getContext().actorOf(BulletManager.props());
+                    alienManager = getContext().actorOf(AlienManager.props(bulletManager));
+                    getContext().become(playing());
+                })
+                .build();
+    }
+    private Receive playing() {
+        return receiveBuilder()
+                .match(Tick.class, t -> {
+                    guiActor.tell(new GameStateDto(GameStateDto.State.Playing, playerDto, bullets, aliens), getSelf());
+                    bulletManager.tell(t, getSelf());
+                    alienManager.tell(t, getSelf());
+                })
+                .match(MoveLeft.class, ml -> {
+                    player.tell(ml, getSelf());
+                })
+                .match(MoveRight.class, mr -> {
+                    player.tell(mr, getSelf());
+                })
+                .match(PlayerDto.class, dto -> {
+                    playerDto = dto;
+                    if (playerDto.lives < 1) {
+                        guiActor.tell(new GameStateDto(GameStateDto.State.GameLost, playerDto, bullets, aliens), getSelf());
+                        getContext().become(idle());
+                    }
+                })
+                .match(Fire.class, f -> {
+                    player.tell(new Player.Fire(bulletManager), getSelf());
+                })
+                .match(Bullets.class, bs -> {
+                    bullets = bs.bullets;
+                })
+                .match(Aliens.class, as -> {
+                    aliens = as.aliens;
+                    if (aliens.isEmpty()) {
+                        guiActor.tell(new GameStateDto(GameStateDto.State.GameWon, playerDto, bullets, aliens), getSelf());
+                        getContext().become(idle());
+                    }
+                })
+                .build();
+    }
+
 
     private LoggingAdapter log = Logging.getLogger(getContext().getSystem(), this);
 
@@ -33,7 +98,9 @@ public class Game extends AbstractActor {
     }
 
     public static class Start {
+        public void foo() {
 
+        }
     }
 
     public static class Fire {
@@ -56,7 +123,7 @@ public class Game extends AbstractActor {
 
     @Override
     public Receive createReceive() {
-        return receiveBuilder().build();
+        return idle();
     }
 
 }

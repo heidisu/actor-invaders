@@ -19,6 +19,7 @@ import space.invaders.dto.BulletDto;
 import space.invaders.dto.GameStateDto;
 import space.invaders.dto.PlayerDto;
 import space.invaders.gamestate.Game;
+import space.invaders.gamestate.Side;
 
 import java.util.*;
 import java.util.function.BiFunction;
@@ -85,7 +86,8 @@ public class GUI extends AbstractActor {
         bullet.setCenterX(bulletDto.posX);
         bullet.setCenterY(bulletDto.posY);
         bullet.setRadius(2.0);
-        bullet.getStyleClass().add(bulletDto.styleClass);
+        String styleClass = bulletDto.side == Side.Player ? "player-bullet" : "alien-bullet";
+        bullet.getStyleClass().add(styleClass);
         return bullet;
     }
 
