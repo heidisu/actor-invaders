@@ -6,8 +6,9 @@ import akka.actor.Props;
 import akka.actor.Terminated;
 import space.invaders.dto.BulletDto;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class BulletManager extends AbstractActor {
@@ -40,7 +41,7 @@ public class BulletManager extends AbstractActor {
                 })
                 .match(Game.Tick.class, tick -> {
                     getContext().getChildren().forEach(br -> br.tell(tick, getSelf()));
-                    getContext().getParent().tell(new Game.Bullets(List.copyOf(refToBullet.values())), getSelf());
+                    getContext().getParent().tell(new Game.Bullets(Collections.unmodifiableList(new ArrayList<>(refToBullet.values()))), getSelf());
                 })
                 .match(BulletDto.class, bd -> refToBullet.put(getSender(), bd))
                 .match(Terminated.class, t -> {
