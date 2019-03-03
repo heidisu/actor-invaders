@@ -6,10 +6,7 @@ import akka.actor.Props;
 import akka.actor.Terminated;
 import space.invaders.dto.AlienDto;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -49,7 +46,7 @@ public class AlienManager extends AbstractActor {
                 .match(Game.Tick.class, tick -> {
                     fireRandomBullet();
                     getContext().getChildren().forEach(alien -> alien.tell(tick, getSelf()));
-                    getContext().getParent().tell(new Game.Aliens(List.copyOf(refToAlien.values())), getSelf());
+                    getContext().getParent().tell(new Game.Aliens(Collections.unmodifiableList(new ArrayList<>(refToAlien.values()))), getSelf());
                 })
                 .match(AlienDto.class, alienDto -> refToAlien.put(getSender(), alienDto))
                 .match(Terminated.class, terminated -> {

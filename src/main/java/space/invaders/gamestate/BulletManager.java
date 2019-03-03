@@ -6,8 +6,9 @@ import akka.actor.Props;
 import akka.actor.Terminated;
 import space.invaders.dto.BulletDto;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class BulletManager extends AbstractActor {
@@ -34,14 +35,14 @@ public class BulletManager extends AbstractActor {
     public Receive createReceive() {
         return receiveBuilder()
                 .match(CreateBullet.class, cb -> {
-                    BulletDto.Type type =  context().sender().path().name().equals("player") ? BulletDto.Type.Player : BulletDto.Type.Alien;
-                    ActorRef bullet =  getContext().actorOf(Bullet.props(type, nextId, cb.posX, cb.posY), "bullet-" + nextId);
+                    BulletDto.Sender sender =  context().sender().path().name().equals("player") ? BulletDto.Sender.Player : BulletDto.Sender.Alien;
+                    ActorRef bullet =  getContext().actorOf(Bullet.props(sender, nextId, cb.posX, cb.posY), "bullet-" + nextId);
                     getContext().watch(bullet);
                     nextId ++;
                 })
                 .match(Game.Tick.class, tick -> {
                     getContext().getChildren().forEach(br -> br.tell(tick, getSelf()));
-                    getContext().getParent().tell(new Game.Bullets(List.copyOf(refToBullet.values())), getSelf());
+                    getContext().getParent().tell(new Game.Bullets(Collections.unmodifiableList(new ArrayList<>(refToBullet.values()))), getSelf());
                 })
                 .match(BulletDto.class, bd -> refToBullet.put(getSender(), bd))
                 .match(Terminated.class, t -> {
