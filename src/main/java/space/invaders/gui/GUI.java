@@ -148,6 +148,7 @@ public class GUI extends AbstractActor {
         stage.setTitle("Space invaders");
         changeScene(getStartScene());
         stage.setResizable(false);
+        stage.setOnCloseRequest(event -> System.exit(0));
         stage.show();
     }
 
