@@ -21,7 +21,7 @@ Communication between other actors mainly occurs between a parent and its childr
 Below are detailed instruction that gradually will make the game work. You can either follow them, or if you want, you can go more "free style" and make the actor system as you like, as long as the `GUI` actor receives the game state as specified in `GameStateDto` it should still work.
 
 ## A very tiny quick guide to Akka
-Here is a very short summary of the Akka and actor basics you might need for the workshop. You can skip it for now and get back to it if you don't find the answer in the task desciption.
+Here is a very short summary of the Akka and actor basics you might need for the workshop. You can skip it for now and get back to it if you don't find the answer in the task desciption. And also, a much better place to look is in the real [Akka documentation](https://doc.akka.io/docs/akka/current/index.html)!
 
 An **Actor** recieves messages, creates other actors, have its internal state. and lives in a hierarchy of actors in an actor system. An actor inherits the class `AbstractActor`, and contains the following important methods
 *  `getSelf()` - `ActorRef` to itself                         
