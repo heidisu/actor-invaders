@@ -107,9 +107,9 @@ Now we have most of the pieces ready to fire bullets, we only need to put the pi
 * Start the game and see that the player now can fire bullets by pushing space. Well done!
 
 ## Task 4: Organize the aliens
-You can of course organize the aliens and have as many of them as you like, below are instructions for make the as shown in the gif.
+You can of course organize the aliens and have as many of them as you like, below are instructions to make the aliens appear as shown in the gif.
 
-The aliens are organized in a grid of 4 x 10 aliens, were bullets are fired random from one of the column where there still are aliens left. The bullet should then be fired from the lowermost alien in that column. The aliens all has a width of 40 px, and can be evenly distributed on the a screen of width 600 with 20 pixels between the aliens, in all directions.
+The aliens are organized in a grid of 4 x 10 aliens, where bullets are fired randomly from one of the columns where there still are aliens left. The bullet should then be fired from the lowermost alien in that column. The aliens all has a width of 40 px, and can be evenly distributed on the a screen of width 600 with 20 pixels between the aliens, in all directions.
 
 ![The grid of aliens](img/alien-grid.png "The grid of aliens")
 
