@@ -10,7 +10,7 @@ import space.invaders.gui.GUI;
 import java.io.Serializable;
 import java.time.Duration;
 
-public class GameInitializer extends AbstractActor {
+public class GameInitializer extends AbstractActor implements Serializable{
 
     public static class Initialize implements Serializable {
         public final ActorRef gui;
