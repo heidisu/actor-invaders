@@ -20,6 +20,7 @@ import space.invaders.dto.GameStateDto;
 import space.invaders.dto.PlayerDto;
 import space.invaders.gamestate.Game;
 
+import java.io.Serializable;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -40,7 +41,7 @@ public class GUI extends AbstractActor {
     private static final int height = GameStateDto.screenSize.height;
     private ActorRef game;
 
-    public static class GameInitialized {
+    public static class GameInitialized implements Serializable {
         final ActorRef game;
 
         public GameInitialized(ActorRef game) {
