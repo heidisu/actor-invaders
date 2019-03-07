@@ -20,6 +20,24 @@ Communication between other actors mainly occurs between a parent and its childr
 
 Below are detailed instruction that gradually will make the game work. You can either follow them, or if you want, you can go more "free style" and make the actor system as you like, as long as the `GUI` actor receives the game state as specified in `GameStateDto` it should still work.
 
+## A very tiny quick guide to Akka
+Here is a very short summary of the Akka and actor basics you might need for the workshop. You can skip it for now and get back to it if you don't find the answer in the task desciption. And also, a much better place to look is in the real [Akka documentation](https://doc.akka.io/docs/akka/current/index.html)!
+
+An **Actor** recieves messages, creates other actors, have its internal state. and lives in a hierarchy of actors in an actor system. An actor inherits the class `AbstractActor`, and contains the following important methods
+*  `getSelf()` - `ActorRef` to itself                         
+* `getSender()` - `ActorRef`to the currently processed message 
+* `getContext()` - the actor context
+
+The **Context** gives contextual information for the actor, like `getChildren()`, `getParent()` and `getSystem()`.  Actors are often created from another actor's context with `getContext().actorOf()`, and the new actor will then be a child of that actor. The constructor of an actor is not used directly, instead each actor class should have a static method returning [`Props`](https://doc.akka.io/docs/akka/current/actors.html#recommended-practices) for its own instantiation. `Props` are created with `Props.create(<MyClass>.class, () -> new <MyClass>(args))`. 
+
+When an actor is created you get hold of an `ActorRef`, which is your reference to the actor and everything you need to send messages to that actor. The `ActorRef` can safely be contained in messages sent to other actors, and it is a common way to introduce an actor to another.
+
+A **Message** is sent to an actor by invoking the `ActorRef`'s `tell` method. The first argument is the message and the second is the `ActorRef` of the sender, often `getSelf()`. It is a good thing to create a message as static inner classes of the actor that will receive those messages. 
+
+The **receiving** of messages in an actor is defined in the `createReceive()` method that all actors have to implement. The `Receive` object is created with a `receiveBuilder()`, which is build by adding a `match` for each message type the actor should respond to, like `receiveBuilder().match(<MyMessage>.class, msg -> {}).build()`. 
+
+The actor can behave like a state machine, by defining different states in terms of `Receive` objects, where different `Recieve`s can respond to different messages, or respond differently to the same message. The transition from one `Receive` to another is called **become**, and within one `Receive` one can move to the next state by invoking `getContext().become(<NextReceive>)`. The `createReceive` method should return the state the actor should start with.
+
 ## Getting started
 To do this workshop you should have the following installed on your computer:
 * [Java JDK](https://www.oracle.com/technetwork/java/javase/downloads/index.html) version >= 9
@@ -65,7 +83,7 @@ Let us get the player into action! Both the player and the aliens are represente
 The `Player`is the actor for the state of actual players's cannon in the game, and it keeps its current position (`posX`, `posY`) and the remaining number of `lives` as its state variables. Every time the player move it will send a `PlayerDto` to its parent actor `Game` (and the `Game` will include that dto as a part of a `GameStateDto` at every `Tick`). 
 
 * We will need to be able to make a `PlayerDto` quite often, so we can probably just create a method that makes one, and returns it. There is already a constant `image` that can be used as argument to the `PlayerDto`s constructor.
-* In the constructor of the `Player` we should set the inital position for the cannon. A normal position would be in the middle, at the bottom of the screen. We should also immediately send a `PlayerDto`back to the `Game`. The `Player` actor is a child of `Game`, so we can use `getContext().parent()` to get hold of the `Game` actorRef.
+* Somewhere in the `Player` we should set the inital position for the cannon, it can be done in the constructor or just set the values where the instance variables are declared. A normal position would be in the middle, at the bottom of the screen. There are constants in the `Player` containing the screen size, which can be used in the calculation. We should also immediately send a `PlayerDto`back to the `Game`. The `Player` actor is a child of `Game`, so we can use `getContext().parent()` to get hold of the `Game` actorRef.
 * In the `Player`'s `createReceive` add matches in the builder for the `Game.MoveLeft` and `Game.MoveRight` messages. In the action function in the match we should update `posX`. Experiment with what number you feel is a good speed, it can be 5. Maybe you also want to stop the player from moving outside the screen? A `PlayerDto` should also be sendt back to the `Game`.
 * In `Game` we should receive the `PlayerDto` and update the instance variable.
 * Start the game and see that you can move the player with the left and right arrows.
@@ -79,7 +97,7 @@ The `Bullet`actor has three private field; an `id`, and the position `posX` and 
 * In the receive builder we will match for the `Tick`message.
   * Update the `posY`of the `Bullet`. Again, pick a suitable number, 10 might be the number.
   * If `posY`is outside the screen, we will stop the bullet. There are [several ways of stopping](https://doc.akka.io/docs/akka/2.5/actors.html#stopping-actors) an actor, depending on the what needs to be done when an actor stops. We can just go for the simple `getContext().stop(getSelf())`.
-  * Otherwise, if the bullet it not outside the screen, we should create a `BulletDto` and tell that back to the sender (which should be the same as the parent). The type for this bullet is `BulletDto.Type.Player`.
+  * Otherwise, if the bullet it not outside the screen, we should create a `BulletDto` and tell that back to the sender (which should be the same as the parent). The sender for this bullet is `BulletDto.Sender.Player`.
 
 ### The BulletManager
 The `BulletManager` will create new bullets and keep track of the `BulletDto` it receives. On every tick it will send the tick further down to each bullet, and send the current list of `BulletDto`s back to `Game`. Note that the manager will not need to wait for the bullets to update their position before it sends the list of dtos back to the `Game`. It just happily send the current situation, so the updates from the `Bullet`actors will take effect in a later tick.
@@ -107,9 +125,9 @@ Now we have most of the pieces ready to fire bullets, we only need to put the pi
 * Start the game and see that the player now can fire bullets by pushing space. Well done!
 
 ## Task 4: Organize the aliens
-You can of course organize the aliens and have as many of them as you like, below are instructions for make the as shown in the gif.
+You can of course organize the aliens and have as many of them as you like, below are instructions to make the aliens appear as shown in the gif.
 
-The aliens are organized in a grid of 4 x 10 aliens, were bullets are fired random from one of the column where there still are aliens left. The bullet should then be fired from the lowermost alien in that column. The aliens all has a width of 40 px, and can be evenly distributed on the a screen of width 600 with 20 pixels between the aliens, in all directions.
+The aliens are organized in a grid of 4 x 10 aliens, where bullets are fired randomly from one of the columns where there still are aliens left. The bullet should then be fired from the lowermost alien in that column. The aliens all has a width of 40 px, and can be evenly distributed on the a screen of width 600 with 20 pixels between the aliens, in all directions.
 
 ![The grid of aliens](img/alien-grid.png "The grid of aliens")
 
@@ -136,9 +154,9 @@ The `AlienManager` has some similarities with the `BulletManager`, it creates al
   * When `Terminated`is recieved, the dead alien should be removed from all the places it is kept in instance variables.
 
 ### The Bullet and the BulletManager
-Now the `BulletManager` will receive `CreateBullet`messages from two different senders; from the `Player`and from the `AlienManager`. It therefore needs to create two different kinds of bullets, one of type player which are moving upwards, and one of type alien which is mowing downwards. 
+Now the `BulletManager` will receive `CreateBullet`messages from two different senders; from the `Player`and from the `AlienManager`. It therefore needs to create two different kinds of bullets, one of with sender player which are moving upwards, and one with sender alien which is mowing downwards. 
 * Decide what you want to do with the `Bullet`actor in order to create bullets of these two kinds. Maybe you want to make it into an abstract base class with two sub classes, one for each bullet type, or maybe just separate the different logic inside the same class by using the existing enum in `BulletDto`, or something else.
-* The `BulletManager` should then be responsible for creating a `Bullet` with the right properties. But how can it know which type of `Bullet`it should make? Again there are choices. The manager can use the name of the sender to deduce what `Bullet`it should make, or we can extend the `CreateBullet` message to contain information that can be used to decide. In the first case the `BulletManager`is in control of what kind of bullets it want to make, in the latter, the sender of the message controls the decision.
+* The `BulletManager` should then be responsible for creating a `Bullet` with the right properties. But how can it know which type of `Bullet`it should make? Again there are choices. The manager can use the name of the sender of the `CreateBullet` message to deduce what `Bullet`it should make, or we can extend the `CreateBullet` message to contain information that can be used to decide. In the first case the `BulletManager`is in control of what kind of bullets it want to make, in the latter, the sender of the message controls the decision.
 
 ### The Game
 In `Game`create the `AlienManager`, and send `Tick`also to the `AlienManager`.
