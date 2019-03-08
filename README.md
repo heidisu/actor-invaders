@@ -179,14 +179,11 @@ In the class `Events` there are two events, one for when an bullet fired from an
   :tada: <b>Congratulations! You did it!</b> :tada:
  </p>
 
-## Bonus tasks
+## Bonus task
 
-### Tests
+Do you want to see how easy it is for actors to communicate with remote actors?
+Let us split our system in two. If you look at the actor hierarchy diagram, we will put the `GUI`actor on one JVM and keep the `GameIntializer`and the `Game` on another, and still be able to play the game.
 
-### Organize the actors in a different way
-
-### Typed Actors
-
-### Remoting
+### Serialization
 
 
