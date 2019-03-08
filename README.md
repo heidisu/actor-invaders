@@ -183,7 +183,7 @@ In the class `Events` there are two events, one for when an bullet fired from an
 
 Do you want to see how easy it is for actors to communicate with remote actors?
 
-Let us split our actor system in two parts. If you look at the actor hierarchy diagram in the introduction you will see our three main actors, the `GUI`, the `Game` and the `GameIntializer`. Let us put the `GUI`actor on one JVM and keep the `GameIntializer`and the `Game` on another, and still be able to play the game.
+Let us split our actor system in two parts. If you look at the actor hierarchy diagram in the introduction you will see our three top level actors, the `GUI`, the `Game` and the `GameIntializer`. We will put the `GUI`actor on one JVM and keep the `GameIntializer`and the `Game`, with all its child actors, on another, and still be able to play the game.
 
 ### Serialization
 
