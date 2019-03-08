@@ -32,7 +32,7 @@ The **Context** gives contextual information for the actor, like `getChildren()`
 
 When an actor is created you get hold of an `ActorRef`, which is your reference to the actor and everything you need to send messages to that actor. The `ActorRef` can safely be contained in messages sent to other actors, and it is a common way to introduce an actor to another.
 
-A **Message** is sent to an actor by invoking the `ActorRef`'s `tell` method. The first argument is the message and the second is the `ActorRef` of the sender, often `getSelf()`. It is a good thing to create a message as static inner classes of the actor that will receive those messages. 
+A **Message** can be sent to an actor by invoking the `ActorRef`'s `tell` method. The first argument is the message and the second is the `ActorRef` of the sender, often `getSelf()`. If you just want to forward a message you can istead use `forward`, which will keep the original sender. It is a good thing to create a message as static inner classes of the actor that will receive those messages. 
 
 The **receiving** of messages in an actor is defined in the `createReceive()` method that all actors have to implement. The `Receive` object is created with a `receiveBuilder()`, which is build by adding a `match` for each message type the actor should respond to, like `receiveBuilder().match(<MyMessage>.class, msg -> {}).build()`. 
 
