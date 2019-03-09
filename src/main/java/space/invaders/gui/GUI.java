@@ -20,6 +20,7 @@ import space.invaders.dto.GameStateDto;
 import space.invaders.dto.PlayerDto;
 import space.invaders.gamestate.Game;
 
+import java.io.Serializable;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -40,7 +41,7 @@ public class GUI extends AbstractActor {
     private static final int height = GameStateDto.screenSize.height;
     private ActorRef game;
 
-    public static class GameInitialized {
+    public static class GameInitialized implements Serializable {
         final ActorRef game;
 
         public GameInitialized(ActorRef game) {
@@ -85,7 +86,8 @@ public class GUI extends AbstractActor {
         bullet.setCenterX(bulletDto.posX);
         bullet.setCenterY(bulletDto.posY);
         bullet.setRadius(2.0);
-        bullet.getStyleClass().add(bulletDto.styleClass);
+        String style = bulletDto.sender.equals(BulletDto.Sender.Player) ? "player-bullet" : "alien-bullet";
+        bullet.getStyleClass().add(style);
         return bullet;
     }
 
@@ -147,6 +149,7 @@ public class GUI extends AbstractActor {
         stage.setTitle("Space invaders");
         changeScene(getStartScene());
         stage.setResizable(false);
+        stage.setOnCloseRequest(event -> System.exit(0));
         stage.show();
     }
 

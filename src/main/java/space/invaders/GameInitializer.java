@@ -10,15 +10,15 @@ import space.invaders.gui.GUI;
 import java.io.Serializable;
 import java.time.Duration;
 
-public class GameInitializer extends AbstractActor {
+public class GameInitializer extends AbstractActor implements Serializable{
 
     public static class Initialize implements Serializable {
         public final ActorRef gui;
-        public final String clientid;
+        public final String playerId;
 
-        public Initialize(ActorRef gui, String clientId) {
+        public Initialize(ActorRef gui, String playerId) {
             this.gui = gui;
-            this.clientid = clientId;
+            this.playerId = playerId;
         }
     }
 
@@ -33,7 +33,7 @@ public class GameInitializer extends AbstractActor {
                     ActorRef game =
                             getContext().getSystem().actorOf(
                                     Game.props(initialize.gui),
-                                    "game-"+ initialize.clientid);
+                                    "game-"+ initialize.playerId);
                     getContext().getSystem().scheduler().schedule(
                             Duration.ZERO,
                             Duration.ofMillis(1000/ GameStateDto.speed.value), game, new Game.Tick(),
