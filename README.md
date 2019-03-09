@@ -183,7 +183,7 @@ In the class `Events` there are two events, one for when an bullet fired from an
 
 Do you want to see how easy it is for actors to communicate with remote actors?
 
-Let us split our actor system in two parts. If you look at the actor hierarchy diagram in the introduction you will see our three top level actors, the `GUI`, the `Game` and the `GameIntializer`. We will run the `GUI`actor in one application and keep the `GameIntializer`and the `Game`, with all its child actors, in another, and still be able to play the game. The applications can both be run on your computer, or team up with someone and run one application each.
+Let us split our actor system in two parts. If you look at the actor hierarchy diagram in the introduction you will see our three top level actors, the `GUI`, the `Game` and the `GameIntializer`. We will run the `GUI`actor in one application and keep the `GameIntializer`and the `Game`, with all its child actors, in another, and still be able to play the game. The applications can both be run on your computer, or you can team up with someone, and run one application each.
 
 ### Serialization
 
@@ -191,7 +191,7 @@ Everything that will be sent between the applications have to be serializable an
 
 ### The Game application
 
-We will now make a jar for the `Game` part. We will have to update the `application.conf` file to enable remoting, and to specify ip and port for the application. This is done by adding the follwing config to the file.
+We will now make a jar for the `Game` part. We have to update the `application.conf` file to enable remoting, and to specify ip and port for the application. This is done by adding the follwing config to the file.
 ```
 akka {
     actor {
@@ -219,11 +219,11 @@ Build the application with maven, and get hold of the `target/actor-invaders-1.0
 
 The gui application need the similar addition in `application.conf`, but change the port to something else, and update the hostname if it will communicate with a different computer.
 
-In `App.java` we will create the actor system as before, but comment in the creation of the `GUI` actor, and comment out the creation of the `GameInitializer`. The application needs to get hold of the `GameInitializer` who lives in the remote system. It can do that by using actor selection in the following way:
+In `App.java` we will create the actor system as before, but comment in the creation of the `GUI` actor, and comment out the creation of the `GameInitializer`. The application needs to get hold of the `GameInitializer` who lives in the remote system. It can do so by using a feature called actor selection in the following way:
 ```
 ActorSelection gameInitializer = system.actorSelection("akka.tcp://space-invaders@127.0.0.1:2552/user/game-initializer");
 ```
-Note that the host and port in the selection path must match what you configured for the game application. Then one can send the `Initialize` message to the gameInitializer, as before in the last line.
+Note that the host and port in the selection path must match what you configured for the game application. Then one can send the `Initialize` message to the gameInitializer as before in the last line.
 
 ### Run the applications
 
