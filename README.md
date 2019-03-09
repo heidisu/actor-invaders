@@ -210,12 +210,21 @@ akka {
 
 The things to notice here are the values for `hostname` and `port`. Update the host name with a reachable ip if you will run the applications on different computers, otherwise the configuration can be kept as it is.
 
-We then have to change our `App.java`. The game application will just create an actor system, and the game initializer actor, remove the line where the gui actor is created, and the last line where the `Initialize` message is sent to the gameIntializer.
+We then have to change our `App.java`. The game application will just create an actor system, and the game initializer actor, comment out the line where the gui actor is created, and the last line where the `Initialize` message is sent to the gameIntializer.
 
 Build the application with maven, and get hold of the `target/actor-invaders-1.0-SNAPSHOT-uber.jar`. Copy it somewhere else, and rename it so you know it is the application with the game part.
 
 
 ### The GUI application
 
+The gui application need the similar addition in `application.conf`, but change the port to something else, and update the hostname if it will communicate with a different computer.
+
+In `App.java` we will the actor system as before, but comment in the creation of the `GUI` actor, and comment out the creation of the `GameInitializer`. But the application needs to get hold of the `GameInitializer` who lives in the remote system. It can do that by using actor selection in the following way:
+```
+ActorSelection gameInitializer = system.actorSelection("akka.tcp://space-invaders@127.0.0.1:2552/user/game-initializer");
+```
+Note that the host and port in the selection path must match what you configured for the game application. Then one can send the `Initialize` message to the gameInitializer, as before in the last line.
 
 ### Run the applications
+
+Start the game application first, and then the gui, and, hey, everything works as before!
