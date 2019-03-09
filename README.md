@@ -183,8 +183,39 @@ In the class `Events` there are two events, one for when an bullet fired from an
 
 Do you want to see how easy it is for actors to communicate with remote actors?
 
-Let us split our actor system in two parts. If you look at the actor hierarchy diagram in the introduction you will see our three top level actors, the `GUI`, the `Game` and the `GameIntializer`. We will put the `GUI`actor on one JVM and keep the `GameIntializer`and the `Game`, with all its child actors, on another, and still be able to play the game.
+Let us split our actor system in two parts. If you look at the actor hierarchy diagram in the introduction you will see our three top level actors, the `GUI`, the `Game` and the `GameIntializer`. We will run the `GUI`actor in one application and keep the `GameIntializer`and the `Game`, with all its child actors, in another, and still be able to play the game. The applications can both be run on your computer, or team up with someone and run one application each.
 
 ### Serialization
 
+Everything that will be sent between the applications have to be serializable and implement the `Serializable` interface. The `GameStateDto` and the things related to game initialization are already serializable, the things left are the messages sent to `Game` from the `GUI` actor. Go to the `Game` class and make sure that all the messages `Start`, `Fire`, `MoveLeft` and `MoveRight` (and others if you have made any yourself) implements `Serializable`.
 
+### The Game application
+
+We will now make a jar for the `Game` part. We will have to update the `application.conf` file to enable remoting, and to specify ip and port for the application. This is done by adding the follwing config to the file.
+```
+akka {
+    actor {
+        provider = remote
+    }
+
+    remote {
+        enabled-transports = ["akka.remote.netty.tcp"]
+        netty.tcp {
+          hostname = "127.0.0.1"
+          port = 2552
+        }
+     }
+}
+```
+
+The things to notice here are the values for `hostname` and `port`. Update the host name with a reachable ip if you will run the applications on different computers, otherwise the configuration can be kept as it is.
+
+We then have to change our `App.java`. The game application will just create an actor system, and the game initializer actor, remove the line where the gui actor is created, and the last line where the `Initialize` message is sent to the gameIntializer.
+
+Build the application with maven, and get hold of the `target/actor-invaders-1.0-SNAPSHOT-uber.jar`. Copy it somewhere else, and rename it so you know it is the application with the game part.
+
+
+### The GUI application
+
+
+### Run the applications
