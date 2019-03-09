@@ -32,9 +32,9 @@ The **Context** gives contextual information for the actor, like `getChildren()`
 
 When an actor is created you get hold of an `ActorRef`, which is your reference to the actor and everything you need to send messages to that actor. The `ActorRef` can safely be contained in messages sent to other actors, and it is a common way to introduce an actor to another.
 
-A **Message** can be sent to an actor by invoking the `ActorRef`'s `tell` method. The first argument is the message and the second is the `ActorRef` of the sender, often `getSelf()`. If you just want to forward a message you can istead use `forward`, which will keep the original sender. It is a good thing to create a message as static inner classes of the actor that will receive those messages. 
+A **Message** can be sent to an actor by invoking the `ActorRef`'s `tell` method. The first argument is the message and the second is the `ActorRef` of the sender, often `getSelf()`. If you just want to forward a message, you can instead use `forward`, which will keep the original sender. It is a good thing to create a message as static inner classes of the actor that will receive that message. 
 
-The **receiving** of messages in an actor is defined in the `createReceive()` method that all actors have to implement. The `Receive` object is created with a `receiveBuilder()`, which is build by adding a `match` for each message type the actor should respond to, like `receiveBuilder().match(<MyMessage>.class, msg -> {}).build()`. 
+The **receiving** of messages in an actor is defined in the `createReceive()` method that all actors have to implement. The `Receive` object is created with a `receiveBuilder()`, which is build up by adding a `match` for each message type the actor should respond to, like `receiveBuilder().match(<MyMessage>.class, msg -> {}).build()`. 
 
 The actor can behave like a state machine, by defining different states in terms of `Receive` objects, where different `Recieve`s can respond to different messages, or respond differently to the same message. The transition from one `Receive` to another is called **become**, and within one `Receive` one can move to the next state by invoking `getContext().become(<NextReceive>)`. The `createReceive` method should return the state the actor should start with.
 
@@ -45,7 +45,7 @@ To do this workshop you should have the following installed on your computer:
 * [Maven](https://maven.apache.org/)
 * A nice editor, like [IntelliJ](https://www.jetbrains.com/idea/)
 
-Clone (or download) this repo, and open the project in your editor. The editor probably knows how to run the project from the main class `App.java`. The code can also be build and run from command line with
+Clone (or download) this repo, and open the project in your editor. The editor probably knows how to run the project from the main class `App.java`. The code can also be built and run from command line with
 ```
 mvn clean install
 java -jar target/actor-invaders-1.0-SNAPSHOT-uber.jar
