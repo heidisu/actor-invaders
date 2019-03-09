@@ -21,7 +21,7 @@ Communication between other actors mainly occurs between a parent and its childr
 Below are detailed instruction that gradually will make the game work. You can either follow them, or if you want, you can go more "free style" and make the actor system as you like, as long as the `GUI` actor receives the game state as specified in `GameStateDto` it should still work.
 
 ## A very tiny quick guide to Akka
-Here is a very short summary of the Akka and actor basics you might need for the workshop. You can skip it for now and get back to it if you don't find the answer in the task desciption. And also, a much better place to look is in the real [Akka documentation](https://doc.akka.io/docs/akka/current/index.html)!
+Here is a very short summary of the Akka and actor basics you might need for the workshop. You can skip it for now and get back to it if you don't find the answer in the task description. And also, a much better place to look is in the real [Akka documentation](https://doc.akka.io/docs/akka/current/index.html)!
 
 An **Actor** recieves messages, creates other actors, have its internal state. and lives in a hierarchy of actors in an actor system. An actor inherits the class `AbstractActor`, and contains the following important methods
 *  `getSelf()` - `ActorRef` to itself                         
@@ -32,9 +32,9 @@ The **Context** gives contextual information for the actor, like `getChildren()`
 
 When an actor is created you get hold of an `ActorRef`, which is your reference to the actor and everything you need to send messages to that actor. The `ActorRef` can safely be contained in messages sent to other actors, and it is a common way to introduce an actor to another.
 
-A **Message** is sent to an actor by invoking the `ActorRef`'s `tell` method. The first argument is the message and the second is the `ActorRef` of the sender, often `getSelf()`. It is a good thing to create a message as static inner classes of the actor that will receive those messages. 
+A **Message** can be sent to an actor by invoking the `ActorRef`'s `tell` method. The first argument is the message and the second is the `ActorRef` of the sender, often `getSelf()`. If you just want to forward a message, you can instead use `forward`, which will keep the original sender. It is a good thing to create a message as static inner classes of the actor that will receive that message. 
 
-The **receiving** of messages in an actor is defined in the `createReceive()` method that all actors have to implement. The `Receive` object is created with a `receiveBuilder()`, which is build by adding a `match` for each message type the actor should respond to, like `receiveBuilder().match(<MyMessage>.class, msg -> {}).build()`. 
+The **receiving** of messages in an actor is defined in the `createReceive()` method that all actors have to implement. The `Receive` object is created with a `receiveBuilder()`, which is build up by adding a `match` for each message type the actor should respond to, like `receiveBuilder().match(<MyMessage>.class, msg -> {}).build()`. 
 
 The actor can behave like a state machine, by defining different states in terms of `Receive` objects, where different `Recieve`s can respond to different messages, or respond differently to the same message. The transition from one `Receive` to another is called **become**, and within one `Receive` one can move to the next state by invoking `getContext().become(<NextReceive>)`. The `createReceive` method should return the state the actor should start with.
 
@@ -45,7 +45,7 @@ To do this workshop you should have the following installed on your computer:
 * [Maven](https://maven.apache.org/)
 * A nice editor, like [IntelliJ](https://www.jetbrains.com/idea/)
 
-Clone (or download) this repo, and open the project in your editor. The editor probably knows how to run the project from the main class `App.java`. The code can also be build and run from command line with
+Clone (or download) this repo, and open the project in your editor. The editor probably knows how to run the project from the main class `App.java`. The code can also be built and run from command line with
 ```
 mvn clean install
 java -jar target/actor-invaders-1.0-SNAPSHOT-uber.jar
@@ -179,14 +179,52 @@ In the class `Events` there are two events, one for when an bullet fired from an
   :tada: <b>Congratulations! You did it!</b> :tada:
  </p>
 
-## Bonus tasks
+## Bonus task
 
-### Tests
+Do you want to see how easy it is for actors to communicate with remote actors?
 
-### Organize the actors in a different way
+Let us split our actor system in two parts. If you look at the actor hierarchy diagram in the introduction you will see our three top level actors, the `GUI`, the `Game` and the `GameIntializer`. We will run the `GUI`actor in one application and keep the `GameIntializer`and the `Game`, with all its child actors, in another, and still be able to play the game. The applications can both be run on your computer, or you can team up with someone, and run one application each.
 
-### Typed Actors
+### Serialization
 
-### Remoting
+Everything that will be sent between the applications have to be serializable and implement the `Serializable` interface. The `GameStateDto` and the things related to game initialization are already serializable, the things left are the messages sent to `Game` from the `GUI` actor. Go to the `Game` class and make sure that all the messages `Start`, `Fire`, `MoveLeft` and `MoveRight` (and others if you have made any yourself) implements `Serializable`.
+
+### The Game application
+
+We will now make a jar for the `Game` part. We have to update the `application.conf` file to enable remoting, and to specify ip and port for the application. This is done by adding the follwing config to the file.
+```
+akka {
+    actor {
+        provider = remote
+    }
+
+    remote {
+        enabled-transports = ["akka.remote.netty.tcp"]
+        netty.tcp {
+          hostname = "127.0.0.1"
+          port = 2552
+        }
+     }
+}
+```
+
+The things to notice here are the values for `hostname` and `port`. Update the host name with a reachable ip if you will run the applications on different computers, otherwise the configuration can be kept as it is.
+
+We then have to change our `App.java`. The game application will just create an actor system, and the game initializer actor, comment out the line where the gui actor is created, and the last line where the `Initialize` message is sent to the gameIntializer.
+
+Build the application with maven, and get hold of the `target/actor-invaders-1.0-SNAPSHOT-uber.jar`. Copy it somewhere else, and rename it so you know it is the application with the game part.
 
 
+### The GUI application
+
+The gui application need the similar addition in `application.conf`, but change the port to something else, and update the hostname if it will communicate with a different computer.
+
+In `App.java` we will create the actor system as before, but comment in the creation of the `GUI` actor, and comment out the creation of the `GameInitializer`. The application needs to get hold of the `GameInitializer` who lives in the remote system. It can do so by using a feature called actor selection in the following way:
+```
+ActorSelection gameInitializer = system.actorSelection("akka.tcp://space-invaders@127.0.0.1:2552/user/game-initializer");
+```
+Note that the host and port in the selection path must match what you configured for the game application. Then one can send the `Initialize` message to the gameInitializer as before in the last line.
+
+### Run the applications
+
+Start the game application first, and then the gui, and, hey, everything works as before!
