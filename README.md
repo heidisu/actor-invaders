@@ -219,7 +219,7 @@ Build the application with maven, and get hold of the `target/actor-invaders-1.0
 
 The gui application need the similar addition in `application.conf`, but change the port to something else, and update the hostname if it will communicate with a different computer.
 
-In `App.java` we will the actor system as before, but comment in the creation of the `GUI` actor, and comment out the creation of the `GameInitializer`. But the application needs to get hold of the `GameInitializer` who lives in the remote system. It can do that by using actor selection in the following way:
+In `App.java` we will create the actor system as before, but comment in the creation of the `GUI` actor, and comment out the creation of the `GameInitializer`. The application needs to get hold of the `GameInitializer` who lives in the remote system. It can do that by using actor selection in the following way:
 ```
 ActorSelection gameInitializer = system.actorSelection("akka.tcp://space-invaders@127.0.0.1:2552/user/game-initializer");
 ```
