@@ -84,7 +84,7 @@ The `Player`is the actor for the state of actual players's cannon in the game, a
 
 * We will need to be able to make a `PlayerDto` quite often, so we can probably just create a method that makes one, and returns it. There is already a constant `image` that can be used as argument to the `PlayerDto`s constructor.
 * Somewhere in the `Player` we should set the inital position for the cannon, it can be done in the constructor or just set the values where the instance variables are declared. A normal position would be in the middle, at the bottom of the screen. There are constants in the `Player` containing the screen size, which can be used in the calculation. We should also immediately send a `PlayerDto`back to the `Game`. The `Player` actor is a child of `Game`, so we can use `getContext().parent()` to get hold of the `Game` actorRef.
-* In the `Player`'s `createReceive` add matches in the builder for the `Game.MoveLeft` and `Game.MoveRight` messages. In the action function in the match we should update `posX`. Experiment with what number you feel is a good speed, it can be 5. Maybe you also want to stop the player from moving outside the screen? A `PlayerDto` should also be sendt back to the `Game`.
+* In the `Player`'s `createReceive` add matches in the builder for the `Game.MoveLeft` and `Game.MoveRight` messages. In the action function in the match we should update `posX`. Experiment with what number you feel is a good speed, it can be 5. Add the speed to `posX` if the player moves right, and subtract if it moves left. Maybe you also want to stop the player from moving outside the screen? A `PlayerDto` should also be sendt back to the `Game`.
 * In `Game` we should receive the `PlayerDto` and update the instance variable.
 * Start the game and see that you can move the player with the left and right arrows.
 
@@ -132,11 +132,11 @@ The aliens are organized in a grid of 4 x 10 aliens, where bullets are fired ran
 ![The grid of aliens](img/alien-grid.png "The grid of aliens")
 
 ### The Alien
-The `Alien` actor keep track of its current position, and its current image, since the aliens alternate between two images. It also need some logic for moving to the right for some time, and then move to the left, and the back again, and for alternating the images.
-* Add a constructor and a static `props` method that takes integers `id`, `posX`, `posY`, and `imageSet` of type `AlienImageSet`, and make and set corresponding private fields.
+The `Alien` actor keeps track of its current position, and its current image, since the aliens alternate between two images. It also need some logic for moving to the right for some time, then move to the left, and then back again, and for alternating the images.
+* Add a constructor and a static `props` method that takes integers `id`, `posX`, `posY`, and `imageSet` of type `AlienImageSet`, and make (and set) corresponding private fields.
 * Make a new message type similar to the one we made for the `Player`. It can be called `Fire` and should take a `BulletManager`actorRef as constructor argument.
 * Add matches in the receiveBulder for `Tick` and `Fire`.
-  * On `Tick` the alien should move, and the send  an `AlienDto` message to its parent. Some logic is needed for moving first right, then left, and then to the right again. And to alternate between the two images. An easy approach can be to just keep some internal counters which are incremented until some limit is reached and the direction and the image are changed, respectively, and the counter is reset.
+  * On `Tick` the alien should move, and then send  an `AlienDto` message to its parent. Some logic is needed for moving first right, then left, and then to the right again, and to alternate between the two images. An easy approach can be to just keep some internal counters which are incremented until some limit is reached. Then change the direction and the image, respectively, and the reset the counter.
   * On `Fire` the `Alien` should tell `CreateBullet` to the bulletManager. The `AlienImageSet` has fields for height and width that might be useful for centering the position of the bullet.
 
 
@@ -149,17 +149,17 @@ The `AlienManager` has some similarities with the `BulletManager`, it creates al
   * The aliens should be watched by the manager
 * The manager should respond to messages of type `Tick`, `AlienDto`and `Terminated`
   * On `Tick`it should decide if it want to fire a random bullet. Perhaps nice to have a separate method for firing the bullet, and the method should randomly choose one of the lowermost aliens from each column (if the column still has aliens left), and tell the selected `Alien` to `Fire`. You probably don't want to fire a bullet at every `Tick`, then it feels like it's raining bullets. 
-  * On `Tick`the manager should also tell all the aliens to tick, and send the `AlienDto`s back to the game, in `Game` we should add a corresponding match which save the aliens in `Game`'s instance variable `aliens`.
+  * On `Tick`the manager should also tell all the aliens to tick, and send the list of `AlienDto`s back to the game, you might want to create a new message type for that in `Game`. We should also add a corresponding match for that message which saves the aliens in `Game`'s instance variable `aliens`.
   * When `AlienDto`is received, the manager should update the `refToAlien` map.
   * When `Terminated`is recieved, the dead alien should be removed from all the places it is kept in instance variables.
 
 ### The Bullet and the BulletManager
-Now the `BulletManager` will receive `CreateBullet`messages from two different senders; from the `Player`and from the `AlienManager`. It therefore needs to create two different kinds of bullets, one of with sender player which are moving upwards, and one with sender alien which is mowing downwards. 
+Now the `BulletManager` will receive `CreateBullet`messages from two different senders; from the `Player`and from the `AlienManager`. It therefore needs to create two different kinds of bullets, one with sender player which are moving upwards, and one with sender alien which is mowing downwards. 
 * Decide what you want to do with the `Bullet`actor in order to create bullets of these two kinds. Maybe you want to make it into an abstract base class with two sub classes, one for each bullet type, or maybe just separate the different logic inside the same class by using the existing enum in `BulletDto`, or something else.
 * The `BulletManager` should then be responsible for creating a `Bullet` with the right properties. But how can it know which type of `Bullet`it should make? Again there are choices. The manager can use the name of the sender of the `CreateBullet` message to deduce what `Bullet`it should make, or we can extend the `CreateBullet` message to contain information that can be used to decide. In the first case the `BulletManager`is in control of what kind of bullets it want to make, in the latter, the sender of the message controls the decision.
 
 ### The Game
-In `Game`create the `AlienManager`, and send `Tick`also to the `AlienManager`.
+In `Game`create the `AlienManager`, and send `Tick`also to the `AlienManager`. You should then have a game with player, aliens and bullets, but the bullets seem to be very harmless...
 
 ## Task 5: it's a war!
 We are actually pretty close to something that behaves like a game! 
