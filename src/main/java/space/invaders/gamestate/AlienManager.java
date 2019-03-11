@@ -31,8 +31,8 @@ public class AlienManager extends AbstractActor {
             AlienImageSet imageSet = AlienImageSet.images.get(i % AlienImageSet.images.size());
             for (int j = 0; j < columns; j++) {
                 int posX = 10 + 60 * j;
-                ActorRef alien = context().actorOf(Alien.props(id, posX, posY, imageSet), "alien-" + id);
-                context().watch(alien);
+                ActorRef alien = getContext().actorOf(Alien.props(id, posX, posY, imageSet), "alien-" + id);
+                getContext().watch(alien);
                 alienGrid[i][j] = alien;
                 id++;
             }
@@ -78,7 +78,7 @@ public class AlienManager extends AbstractActor {
                 }
             }
             ActorRef actor = alienGrid[maxRow][col];
-            actor.tell(new Alien.Fire(bulletManager), self());
+            actor.tell(new Alien.Fire(bulletManager), getSelf());
         }
     }
 

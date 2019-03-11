@@ -57,7 +57,7 @@ public class Alien extends AbstractActor {
                         countMoves = -15;
                         move = move.equals(moveLeft) ? moveRight : moveLeft;
                     }
-                    context().parent().tell(new AlienDto(id, posX, posY, new Image(imageSet.width, imageSet.height, currentImage)), self());
+                    getContext().getParent().tell(new AlienDto(id, posX, posY, new Image(imageSet.width, imageSet.height, currentImage)), getSelf());
                 } )
                 .match(Fire.class, fire -> fire.bulletManager.tell(new BulletManager.CreateBullet(posX + imageSet.width/2, posY + imageSet.height), getSelf()))
                 .build();
