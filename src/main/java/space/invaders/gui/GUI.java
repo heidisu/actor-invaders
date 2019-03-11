@@ -117,7 +117,7 @@ public class GUI extends AbstractActor {
         root = new StackPane();
         Button btn = new Button();
         btn.setText("Start game");
-        btn.setOnAction(event -> game.tell(new Game.Start(), self()));
+        btn.setOnAction(event -> game.tell(new Game.Start(), getSelf()));
         root.getChildren().add(btn);
         return new Scene(root, width, height);
     }
@@ -133,11 +133,11 @@ public class GUI extends AbstractActor {
         Scene scene = new Scene(root, width, height);
         scene.addEventFilter(KeyEvent.KEY_PRESSED, keyEvent -> {
             switch (keyEvent.getCode()){
-                case RIGHT: game.tell(new Game.MoveRight(), ActorRef.noSender());
+                case RIGHT: game.tell(new Game.MoveRight(), getSelf());
                     break;
-                case LEFT: game.tell(new Game.MoveLeft(), ActorRef.noSender());
+                case LEFT: game.tell(new Game.MoveLeft(), getSelf());
                     break;
-                case SPACE:game.tell(new Game.Fire(), ActorRef.noSender());
+                case SPACE:game.tell(new Game.Fire(), getSelf());
                 default:break;
             }
         });
