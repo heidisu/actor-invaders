@@ -57,7 +57,7 @@ public class AlienManager extends AbstractActor {
     }
 
     private void fireRandomBullet() {
-        if(fireBulletCounter != 10 ){
+        if(fireBulletCounter < 10 ){
             fireBulletCounter++;
         }
         else {
