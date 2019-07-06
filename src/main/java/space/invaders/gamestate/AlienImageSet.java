@@ -5,10 +5,13 @@ import space.invaders.dto.Image;
 import java.util.List;
 
 class AlienImageSet {
+    private final int width, height;
     private final Image first;
     private final Image second;
 
     private AlienImageSet(int width, int height, String imagePath1, String imagePath2) {
+        this.width = width;
+        this.height = height;
         this.first = new Image(width, height, imagePath1);
         this.second = new Image(width, height, imagePath2);
     }
@@ -19,6 +22,14 @@ class AlienImageSet {
 
     Image getOther (Image currentImage){
         return first.equals(currentImage) ? second : first;
+    }
+
+    int getWidth(){
+        return width;
+    }
+
+    int getHeight(){
+        return height;
     }
 
 

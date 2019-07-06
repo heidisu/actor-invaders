@@ -36,7 +36,7 @@ public class AlienManager extends AbstractActor {
                 alienGrid[i][j] = alien;
                 id++;
             }
-            posY = posY + imageSet.height + 20;
+            posY = posY + imageSet.getHeight() + 20;
         }
     }
 
