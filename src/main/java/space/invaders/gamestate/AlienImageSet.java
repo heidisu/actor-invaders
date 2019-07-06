@@ -24,14 +24,13 @@ class AlienImageSet {
         return first.equals(currentImage) ? second : first;
     }
 
-    int getWidth(){
+    int getWidth() {
         return width;
     }
 
-    int getHeight(){
+    int getHeight() {
         return height;
     }
-
 
     private static AlienImageSet alien1 = new AlienImageSet(40, 40* 224/308, "img/alien1-closed.png", "img/alien1-open.png");
     private static AlienImageSet alien2 = new AlienImageSet(40, 40* 224/336, "img/alien2-closed.png", "img/alien2-open.png");
