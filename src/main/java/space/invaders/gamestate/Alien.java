@@ -14,7 +14,7 @@ public class Alien extends AbstractActor {
     private final int posY;
     private final AlienImageSet imageSet;
     private int countDown = 10;
-    private String currentImage;
+    private Image currentImage;
     private final Function<Integer, Integer> moveRight = i -> i + 5;
     private final Function<Integer, Integer> moveLeft = i -> i - 5;
     private Function<Integer, Integer> move = moveRight;
@@ -34,7 +34,7 @@ public class Alien extends AbstractActor {
 
     public Alien(int id, int posX, int posY, AlienImageSet imageSet) {
         this.id = id;
-        this.currentImage = imageSet.imagePath1;
+        this.currentImage = imageSet.getFirst();
         this.posX = posX;
         this.posY = posY;
         this.imageSet = imageSet;
@@ -45,7 +45,7 @@ public class Alien extends AbstractActor {
         return receiveBuilder()
                 .match(Game.Tick.class, tick -> {
                     if(countDown == 0) {
-                        currentImage = currentImage.equals(imageSet.imagePath1) ? imageSet.imagePath2 : imageSet.imagePath1;
+                        currentImage = imageSet.getOther(currentImage);
                         posX = move.apply(posX);
                         countDown = 10;
                         countMoves++;
@@ -57,9 +57,9 @@ public class Alien extends AbstractActor {
                         countMoves = -15;
                         move = move.equals(moveLeft) ? moveRight : moveLeft;
                     }
-                    getContext().getParent().tell(new AlienDto(id, posX, posY, new Image(imageSet.width, imageSet.height, currentImage)), getSelf());
+                    getContext().getParent().tell(new AlienDto(id, posX, posY, currentImage), getSelf());
                 } )
-                .match(Fire.class, fire -> fire.bulletManager.tell(new BulletManager.CreateBullet(posX + imageSet.width/2, posY + imageSet.height), getSelf()))
+                .match(Fire.class, fire -> fire.bulletManager.tell(new BulletManager.CreateBullet(posX + imageSet.getWidth()/2, posY + imageSet.getWidth()), getSelf()))
                 .match(Events.PlayerBulletMoved.class, bm -> {
                     if(isHit(bm.bulletDto.posX, bm.bulletDto.posY)){
                         getContext().stop(bm.bulletActor);
@@ -70,6 +70,6 @@ public class Alien extends AbstractActor {
     }
 
     private boolean isHit(int x, int y){
-        return x >= posX && x <= posX + imageSet.width && y >= posY && y <= posY + imageSet.height;
+        return x >= posX && x <= posX + imageSet.getWidth() && y >= posY && y <= posY + imageSet.getHeight();
     }
 }
