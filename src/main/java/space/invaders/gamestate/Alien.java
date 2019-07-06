@@ -59,7 +59,7 @@ public class Alien extends AbstractActor {
                     }
                     getContext().getParent().tell(new AlienDto(id, posX, posY, currentImage), getSelf());
                 } )
-                .match(Fire.class, fire -> fire.bulletManager.tell(new BulletManager.CreateBullet(posX + currentImage.width/2, posY + currentImage.height), getSelf()))
+                .match(Fire.class, fire -> fire.bulletManager.tell(new BulletManager.CreateBullet(posX + imageSet.getWidth()/2, posY + imageSet.getHeight()), getSelf()))
                 .build();
     }
 }
