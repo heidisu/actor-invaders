@@ -1,19 +1,26 @@
 package space.invaders.gamestate;
 
+import space.invaders.dto.Image;
+
 import java.util.List;
 
 class AlienImageSet {
-    final int width;
-    final int height;
-    final String imagePath1;
-    final String imagePath2;
+    private final Image first;
+    private final Image second;
 
     private AlienImageSet(int width, int height, String imagePath1, String imagePath2) {
-        this.width = width;
-        this.height = height;
-        this.imagePath1 = imagePath1;
-        this.imagePath2 = imagePath2;
+        this.first = new Image(width, height, imagePath1);
+        this.second = new Image(width, height, imagePath2);
     }
+
+    Image getFirst(){
+        return first;
+    }
+
+    Image getOther (Image currentImage){
+        return first.equals(currentImage) ? second : first;
+    }
+
 
     private static AlienImageSet alien1 = new AlienImageSet(40, 40* 224/308, "img/alien1-closed.png", "img/alien1-open.png");
     private static AlienImageSet alien2 = new AlienImageSet(40, 40* 224/336, "img/alien2-closed.png", "img/alien2-open.png");
