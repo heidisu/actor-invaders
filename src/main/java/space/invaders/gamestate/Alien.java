@@ -60,6 +60,16 @@ public class Alien extends AbstractActor {
                     getContext().getParent().tell(new AlienDto(id, posX, posY, currentImage), getSelf());
                 } )
                 .match(Fire.class, fire -> fire.bulletManager.tell(new BulletManager.CreateBullet(posX + currentImage.width/2, posY + currentImage.height), getSelf()))
+                .match(Events.PlayerBulletMoved.class, bm -> {
+                    if(isHit(bm.bulletDto.posX, bm.bulletDto.posY)){
+                        getContext().stop(bm.bulletActor);
+                        getContext().stop(self());
+                    }
+                })
                 .build();
+    }
+
+    private boolean isHit(int x, int y){
+        return x >= posX && x <= posX + imageSet.getWidth() && y >= posY && y <= posY + imageSet.getHeight();
     }
 }
