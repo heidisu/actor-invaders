@@ -24,14 +24,6 @@ public class Alien extends AbstractActor {
         return Props.create(Alien.class, () -> new Alien(id, posX, posY, imageSet));
     }
 
-    static class Fire {
-        private final ActorRef bulletManager;
-
-        Fire(ActorRef bulletManager) {
-            this.bulletManager = bulletManager;
-        }
-    }
-
     public Alien(int id, int posX, int posY, AlienImageSet imageSet) {
         this.id = id;
         this.currentImage = imageSet.getFirst();
@@ -59,7 +51,6 @@ public class Alien extends AbstractActor {
                     }
                     getContext().getParent().tell(new AlienDto(id, posX, posY, currentImage), getSelf());
                 } )
-                .match(Fire.class, fire -> fire.bulletManager.tell(new BulletManager.CreateBullet(posX + imageSet.getWidth()/2, posY + imageSet.getHeight()), getSelf()))
                 .build();
     }
 }
