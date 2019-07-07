@@ -127,41 +127,50 @@ Now we should have all the pieces we need to fire bullets, we only have to put t
 ## Task 4: Organize the aliens
 You can of course organize the aliens and have as many of them as you like, below are instructions to make the aliens appear as shown in the gif.
 
-The aliens are organized in a grid of 4 x 10 aliens, where bullets are fired randomly from one of the columns where there still are aliens left. The bullet should then be fired from the lowermost alien in that column. The aliens all has a width of 40 px, and can be evenly distributed on the a screen of width 600 with 20 pixels between the aliens, in all directions.
+The aliens are organized in a grid of 4 x 10 aliens, where bullets are fired randomly from one of the columns where there still are aliens left. The aliens all has a width of 40 px, and can be evenly distributed on the a screen of width 600 with 20 pixels between the aliens, in all directions.
 
 ![The grid of aliens](img/alien-grid.png "The grid of aliens")
 
 ### The Alien
 The `Alien` actor keeps track of its current position, and its current image, since the aliens alternate between two images. It also need some logic for moving to the right for some time, then move to the left, and then back again, and for alternating the images.
 * Add a constructor and a static `props` method that takes integers `id`, `posX`, `posY`, and `imageSet` of type `AlienImageSet`, and make (and set) corresponding private fields. The `AlienImageSet` has a `getFirst()` which gives the first image in the set.
-* Make a new message type similar to the one we made for the `Player`. It can be called `Fire` and should take a `BulletManager`actorRef as constructor argument.
-* Add matches in the receiveBulder for `Tick` and `Fire`.
-  * On `Tick` the alien should move, and then send  an `AlienDto` message to its parent. Some logic is needed for moving first right, then left, and then to the right again, and to alternate between the two images. An easy approach can be to just keep some internal counters which are incremented until some limit is reached. Then change the direction and the image, respectively, and the reset the counter. The method `getOther` in `AlienImageSet` can be useful for switching the image.
-  * On `Fire` the `Alien` should tell `CreateBullet` to the bulletManager. The `AlienImageSet` has getters for height and width that might be useful for centering the position of the bullet.
-
+* Add matches in the receiveBulder for `Tick`. On `Tick` the alien should move, and then send  an `AlienDto` message to its parent. Some logic is needed for moving first right, then left, and then to the right again, and to alternate between the two images. An easy approach can be to just keep some internal counters which are incremented until some limit is reached. Then change the direction and the image, respectively, and the reset the counter. The method `getOther` in `AlienImageSet` can be useful for switching the image.
 
 ### The AlienManager
-The `AlienManager` has some similarities with the `BulletManager`, it creates all the `Alien` actors, and watch them so that it can remove dead aliens. The manager receives `AlienDto` messages from aliens, and sends a current list of `AlienDto`back to `Game` at each `Tick`. The aliens are organized in a grid, and the manager is responsible for making a random alien fire a bullet now and then.
+The `AlienManager` has some similarities with the `BulletManager`, it creates all the `Alien` actors, and watch them so that it can remove dead aliens. The manager receives `AlienDto` messages from aliens, and sends a current list of `AlienDto`back to `Game` at each `Tick`.
 * Make a constructor and static `props` method. Both should take an `ActorRef` for the `BulletManager` as argument.
 * The grid of aliens can be initialized in the constructor
   * Use for instance a double for loop, and add actorRefs to the manager's grid variable.
   * Use the three different image sets defined in `AlienImageSet` so that aliens on same row has same image, and the rows alternates between different images.
   * The aliens should be watched by the manager
 * The manager should respond to messages of type `Tick`, `AlienDto`and `Terminated`
-  * On `Tick`it should decide if it want to fire a random bullet. Perhaps nice to have a separate method for firing the bullet, and the method should randomly choose one of the lowermost aliens from each column (if the column still has aliens left), and tell the selected `Alien` to `Fire`. You probably don't want to fire a bullet at every `Tick`, then it feels like it's raining bullets. 
-  * On `Tick`the manager should also tell all the aliens to tick, and send the list of `AlienDto`s back to the game, you might want to create a new message type for that in `Game`. We should also add a corresponding match for that message which saves the aliens in `Game`'s instance variable `aliens`.
+  * On `Tick`the manager should tell all the aliens to tick, and send the list of `AlienDto`s back to the game. You might want to create a new message type for that in `Game`, and we should also add a corresponding match for that message which saves the aliens in `Game`'s instance variable `aliens`.
   * When `AlienDto`is received, the manager should update the `refToAlien` map.
   * When `Terminated`is recieved, the dead alien should be removed from all the places it is kept in instance variables.
 
+### The Game
+In `Game`create the `AlienManager`, and send `Tick`also to the `AlienManager`. We you start the application now you should have marching aliens in your game, but the aliens are still very harmless.
+
+## Task 5: Oh no, the aliens attack
+We will now make sure that bullets are fired randomly from one of the columns in the alien grid where there still are aliens left. The bullet should then be fired from the lowermost alien in that column.
+
+### The Alien
+* Make a new message type similar to the one we made for the `Player`. It can be called `Fire` and should take a `BulletManager`actorRef as constructor argument.
+* Add matches in the receiveBulder for `Fire`. On `Fire` the `Alien` should tell `CreateBullet` to the bulletManager. The `AlienImageSet` has getters for height and width that might be useful for centering the position of the bullet.
+
+### The AlienManager
+* On `Tick`the `AlienManager` should decide if it want to fire a random bullet. It is perhaps nice to have a separate method for firing the bullet, and the method should randomly choose one of the lowermost aliens from each column (if the column still has aliens left), and tell the selected `Alien` to `Fire`. 
+* You probably don't want to fire a bullet at every `Tick`, then it feels like it's raining bullets. 
+ 
 ### The Bullet and the BulletManager
 Now the `BulletManager` will receive `CreateBullet`messages from two different senders; from the `Player`and from the `AlienManager`. It therefore needs to create two different kinds of bullets, one with sender player which are moving upwards, and one with sender alien which is mowing downwards. 
 * Decide what you want to do with the `Bullet`actor in order to create bullets of these two kinds. Maybe you want to make it into an abstract base class with two sub classes, one for each bullet type, or maybe just separate the different logic inside the same class by using the existing enum in `BulletDto`, or something else.
 * The `BulletManager` should then be responsible for creating a `Bullet` with the right properties. But how can it know which type of `Bullet`it should make? Again there are choices. The manager can use the name of the sender of the `CreateBullet` message to deduce what `Bullet`it should make, or we can extend the `CreateBullet` message to contain information that can be used to decide. In the first case the `BulletManager`is in control of what kind of bullets it want to make, in the latter, the sender of the message controls the decision. To get hold of the name of the sender you can invoke `getSender().path().name()`.
 
-### The Game
-In `Game`create the `AlienManager`, and send `Tick`also to the `AlienManager`. You should then have a game with player, aliens and bullets, but the bullets seem to be very harmless...
+Now there also should be bullets fired from aliens when you run the application.
 
-## Task 5: it's a war!
+
+## Task 6: it's a war!
 We are actually pretty close to something that behaves like a game! 
 
 The main remaining part is to detect when the player or the aliens are hit by bullets. If the player is hit it should loose a life, and if there is no lives left, the game is lost. When an alien is hit it should be removed, and if there are no aliens left the game is won. When a bullet hits something it should disappear from the screen.
@@ -179,17 +188,19 @@ In the class `Events` there are two events, one for when an bullet fired from an
   :tada: <b>Congratulations! You did it!</b> :tada:
  </p>
 
-## Bonus task
+## Bonus tasks
+
+### Bonus task 1: Akka remoting
 
 Do you want to see how easy it is for actors to communicate with remote actors?
 
 Let us split our actor system in two parts. If you look at the actor hierarchy diagram in the introduction you will see our three top level actors, the `GUI`, the `Game` and the `GameIntializer`. We will run the `GUI`actor in one application and keep the `GameIntializer`and the `Game`, with all its child actors, in another, and still be able to play the game. The applications can both be run on your computer, or you can team up with someone, and run one application each.
 
-### Serialization
+#### Serialization
 
 Everything that will be sent between the applications have to be serializable and implement the `Serializable` interface. The `GameStateDto` and the things related to game initialization are already serializable, the things left are the messages sent to `Game` from the `GUI` actor. Go to the `Game` class and make sure that all the messages `Start`, `Fire`, `MoveLeft` and `MoveRight` (and others if you have made any yourself) implements `Serializable`.
 
-### The Game application
+#### The Game application
 
 We will now make a jar for the `Game` part. We have to update the `application.conf` file to enable remoting, and to specify ip and port for the application. This is done by adding the follwing config to the file.
 ```
@@ -215,7 +226,7 @@ We then have to change our `App.java`. The game application will just create an 
 Build the application with maven, and get hold of the `target/actor-invaders-1.0-SNAPSHOT-uber.jar`. Copy it somewhere else, and rename it so you know it is the application with the game part.
 
 
-### The GUI application
+#### The GUI application
 
 The gui application need the similar addition in `application.conf`, but change the port to something else, and update the hostname if it will communicate with a different computer.
 
@@ -225,6 +236,8 @@ ActorSelection gameInitializer = system.actorSelection("akka.tcp://space-invader
 ```
 Note that the host and port in the selection path must match what you configured for the game application. Then one can send the `Initialize` message to the gameInitializer as before in the last line.
 
-### Run the applications
+#### Run the applications
 
 Start the game application first, and then the gui, and, hey, everything works as before!
+
+### Bonus task 2: Akka Typed
