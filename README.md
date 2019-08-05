@@ -241,3 +241,21 @@ Note that the host and port in the selection path must match what you configured
 Start the game application first, and then the gui, and, hey, everything works as before!
 
 ### Bonus task 2: Akka Typed
+
+#### Add dependency
+First we need to add the maven dependency for Akka Typed, copy the following lines into your `pom.xml` file.
+```
+<dependency>
+    <groupId>com.typesafe.akka</groupId>
+    <artifactId>akka-actor-typed_2.12</artifactId>
+    <version>${akka.version}</version>
+</dependency>
+```
+
+#### Prepare messages for the Player
+
+#### Create behaviours for the Player
+
+#### Update Game with the typed Player
+
+#### Stop bullets
