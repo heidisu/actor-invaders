@@ -242,6 +242,8 @@ Start the game application first, and then the gui, and, hey, everything works a
 
 ### Bonus task 2: Akka Typed
 
+There is another actor API we haven't talked about yet, the [Akka Typed](https://doc.akka.io/docs/akka/current/typed/index.html). One challenge with the `AbstractActor` API we have used so far is that there is no control of what messages an actor will react to, and what messages can be sent to an actor. It is easy to loose control over the message flow. As the name suggests, the Akka Typed API improves this.
+
 #### Add dependency
 First we need to add the maven dependency for Akka Typed, copy the following lines into your `pom.xml` file.
 ```
