@@ -3,6 +3,7 @@ package space.invaders.gamestate;
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import akka.actor.Props;
+import akka.actor.typed.javadsl.Adapter;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
 import space.invaders.dto.AlienDto;
@@ -17,7 +18,7 @@ public class Game extends AbstractActor {
     private final ActorRef guiActor;
     private final int width = GameStateDto.screenSize.width;
     private final int height = GameStateDto.screenSize.height;
-    private ActorRef player;
+    private akka.actor.typed.ActorRef<Player.PlayerMessage> player;
     private ActorRef bulletMananger;
     private ActorRef alienManager;
     private PlayerDto playerDto;
@@ -42,11 +43,11 @@ public class Game extends AbstractActor {
 
     }
 
-    public static class MoveLeft {
+    public static class MoveLeft implements Player.PlayerMessage {
 
     }
 
-    public static class MoveRight {
+    public static class MoveRight implements Player.PlayerMessage {
 
     }
 
@@ -74,8 +75,9 @@ public class Game extends AbstractActor {
     private Receive getIdle() {
         return receiveBuilder()
                 .match(Start.class, start -> {
-                        player = getContext().actorOf(Player.props(), "player");
-                        getContext().getSystem().getEventStream().subscribe(player, Events.AlienBulletMoved.class);
+                        player =  Adapter.spawn(getContext(), Player.startPlayer(), "player");
+                        player.tell(new Player.Start(getSelf()));
+                        getContext().getSystem().getEventStream().subscribe(Adapter.toUntyped(player), Events.AlienBulletMoved.class);
                         bulletMananger = getContext().actorOf(BulletManager.props(), "bulletmanager");
                         alienManager = getContext().actorOf(AlienManager.props(bulletMananger), "alienmanager");
                         log.info("Game started!");
@@ -91,8 +93,8 @@ public class Game extends AbstractActor {
                     bulletMananger.tell(tick, getSelf());
                     alienManager.tell(tick, getSelf());
                 })
-                .match(MoveLeft.class, ml -> player.tell(ml, getSelf()))
-                .match(MoveRight.class, mr -> player.tell(mr, getSelf()))
+                .match(MoveLeft.class, ml -> player.tell(ml))
+                .match(MoveRight.class, mr -> player.tell(mr))
                 .match(PlayerDto.class, playerDto -> {
                     this.playerDto = playerDto;
                     if(playerDto.lives == 0){
@@ -100,7 +102,7 @@ public class Game extends AbstractActor {
                         getContext().become(getGameOver());
                     }
                 })
-                .match(Fire.class, fire -> player.tell(new Player.Fire(bulletMananger), getSelf()))
+                .match(Fire.class, fire -> player.tell(new Player.Fire(bulletMananger)))
                 .match(Bullets.class, bullets -> this.bullets = bullets.bullets)
                 .match(Aliens.class, aliens -> {
                     boolean noMoreAliens = !this.aliens.isEmpty() && aliens.aliens.isEmpty();

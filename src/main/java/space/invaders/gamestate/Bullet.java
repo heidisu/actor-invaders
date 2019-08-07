@@ -30,6 +30,8 @@ public class Bullet extends AbstractActor {
         this.posY = posY;
     }
 
+    static class Stop {}
+
     @Override
     public Receive createReceive() {
         return receiveBuilder()
@@ -43,6 +45,9 @@ public class Bullet extends AbstractActor {
                         getContext().getParent().tell(bulletDto, getSelf());
                         getContext().getSystem().getEventStream().publish(createEvent.apply(getSelf(), bulletDto));
                     }
+                })
+                .match(Stop.class, stop -> {
+                    getContext().stop(getSelf());
                 })
                 .build();
     }

@@ -15,14 +15,14 @@ public class Events {
         }
     }
 
-    static class AlienBulletMoved extends BulletMoved{
+    static class AlienBulletMoved extends BulletMoved implements Player.PlayerMessage {
 
         AlienBulletMoved(ActorRef bulletActor, BulletDto bulletDto) {
             super(bulletActor, bulletDto);
         }
     }
 
-    static class PlayerBulletMoved extends BulletMoved{
+    static class PlayerBulletMoved extends BulletMoved {
 
         PlayerBulletMoved(ActorRef bulletActor, BulletDto bulletDto) {
             super(bulletActor, bulletDto);
