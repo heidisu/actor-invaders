@@ -10,6 +10,7 @@ import space.invaders.dto.BulletDto;
 import space.invaders.dto.GameStateDto;
 import space.invaders.dto.PlayerDto;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,32 +22,33 @@ public class Game extends AbstractActor {
     private ActorRef bulletMananger;
     private ActorRef alienManager;
     private PlayerDto playerDto;
+    private final ActorRef monitorActor;
     private List<BulletDto> bullets = new ArrayList<>();
     private List<AlienDto> aliens = new ArrayList<>();
 
     private LoggingAdapter log = Logging.getLogger(getContext().getSystem(), this);
 
-    public static Props props(ActorRef guiActor) {
-        return Props.create(Game.class, () -> new Game(guiActor));
+    public static Props props(ActorRef guiActor, ActorRef monitorActor) {
+        return Props.create(Game.class, () -> new Game(guiActor, monitorActor));
     }
 
     public static class Tick {
 
     }
 
-    public static class Start {
+    public static class Start implements Serializable {
 
     }
 
-    public static class Fire {
+    public static class Fire implements Serializable{
 
     }
 
-    public static class MoveLeft {
+    public static class MoveLeft implements Serializable{
 
     }
 
-    public static class MoveRight {
+    public static class MoveRight implements Serializable{
 
     }
 
@@ -66,8 +68,9 @@ public class Game extends AbstractActor {
         }
     }
 
-    private Game(ActorRef guiActor) {
+    private Game(ActorRef guiActor, ActorRef monitorActor) {
         this.guiActor = guiActor;
+        this.monitorActor = monitorActor;
     }
 
 
@@ -87,7 +90,9 @@ public class Game extends AbstractActor {
     private Receive getPlaying() {
         return receiveBuilder()
                 .match(Tick.class, tick -> {
-                    guiActor.tell(new GameStateDto(GameStateDto.State.Playing, playerDto, bullets, aliens), getSelf());
+                    GameStateDto gs = new GameStateDto(GameStateDto.State.Playing, playerDto, bullets, aliens);
+                    guiActor.tell(gs, getSelf());
+                    monitorActor.tell(gs, getSelf());
                     bulletMananger.tell(tick, getSelf());
                     alienManager.tell(tick, getSelf());
                 })
@@ -96,7 +101,10 @@ public class Game extends AbstractActor {
                 .match(PlayerDto.class, playerDto -> {
                     this.playerDto = playerDto;
                     if(playerDto.lives == 0){
-                        guiActor.tell(new GameStateDto(GameStateDto.State.GameLost, playerDto, bullets, aliens), getSelf());
+                        GameStateDto gs = new GameStateDto(GameStateDto.State.GameLost, playerDto, bullets, aliens);
+                        guiActor.tell(gs, getSelf());
+                        getContext().stop(getSelf());
+                        monitorActor.tell(gs, getSelf());
                         getContext().become(getGameOver());
                     }
                 })
@@ -106,7 +114,10 @@ public class Game extends AbstractActor {
                     boolean noMoreAliens = !this.aliens.isEmpty() && aliens.aliens.isEmpty();
                     this.aliens = aliens.aliens;
                     if(noMoreAliens){
-                        guiActor.tell(new GameStateDto(GameStateDto.State.GameWon, playerDto, bullets, this.aliens), getSelf());
+                        GameStateDto gs = new GameStateDto(GameStateDto.State.GameWon, playerDto, bullets, this.aliens);
+                        guiActor.tell(gs, getSelf());
+                        monitorActor.tell(gs, getSelf());
+                        getContext().stop(getSelf());
                         getContext().become(getGameOver());
                     }
                 })

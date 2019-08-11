@@ -3,6 +3,7 @@ package space.invaders;
 import akka.actor.AbstractActor;
 import akka.actor.ActorRef;
 import akka.actor.Props;
+import akka.actor.Terminated;
 import space.invaders.dto.GameStateDto;
 import space.invaders.gamestate.Game;
 import space.invaders.gui.GUI;
@@ -11,6 +12,7 @@ import java.io.Serializable;
 import java.time.Duration;
 
 public class GameInitializer extends AbstractActor implements Serializable{
+private final ActorRef gameMonitor;
 
     public static class Initialize implements Serializable {
         public final ActorRef gui;
@@ -22,8 +24,12 @@ public class GameInitializer extends AbstractActor implements Serializable{
         }
     }
 
-    static public Props props() {
-        return Props.create(GameInitializer.class, GameInitializer::new);
+    static public Props props(ActorRef gameMonitor) {
+        return Props.create(GameInitializer.class, () -> new GameInitializer(gameMonitor));
+    }
+
+    public GameInitializer(ActorRef gameMonitor) {
+        this.gameMonitor = gameMonitor;
     }
 
     @Override
@@ -32,7 +38,7 @@ public class GameInitializer extends AbstractActor implements Serializable{
                 .match(Initialize.class, initialize -> {
                     ActorRef game =
                             getContext().getSystem().actorOf(
-                                    Game.props(initialize.gui),
+                                    Game.props(initialize.gui, gameMonitor),
                                     "game-"+ initialize.playerId);
                     getContext().getSystem().scheduler().schedule(
                             Duration.ZERO,
