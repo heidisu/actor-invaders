@@ -10,6 +10,7 @@ import space.invaders.dto.BulletDto;
 import space.invaders.dto.GameStateDto;
 import space.invaders.dto.PlayerDto;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,19 +35,19 @@ public class Game extends AbstractActor {
 
     }
 
-    public static class Start {
+    public static class Start implements Serializable {
 
     }
 
-    public static class Fire {
+    public static class Fire implements Serializable{
 
     }
 
-    public static class MoveLeft {
+    public static class MoveLeft implements Serializable{
 
     }
 
-    public static class MoveRight {
+    public static class MoveRight implements Serializable{
 
     }
 
