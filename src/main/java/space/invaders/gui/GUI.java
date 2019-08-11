@@ -54,10 +54,9 @@ public class GUI extends AbstractActor {
     }
 
     private GUI(){
-        super();
         createLivesLabel();
         createGameOverLabel();
-        start(new Stage());
+        start();
     }
 
     @Override
@@ -144,8 +143,8 @@ public class GUI extends AbstractActor {
         return scene;
     }
 
-    private void start(Stage stage) {
-        this.stage = stage;
+    private void start() {
+        stage = new Stage();
         stage.setTitle("Space invaders");
         changeScene(getStartScene());
         stage.setResizable(false);
