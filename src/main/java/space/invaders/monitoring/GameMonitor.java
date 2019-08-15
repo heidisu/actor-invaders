@@ -6,6 +6,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
+import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
@@ -29,7 +30,6 @@ public class GameMonitor extends AbstractActor {
     }
 
     private GameMonitor() {
-        super();
         initialize();
     }
 
@@ -45,7 +45,7 @@ public class GameMonitor extends AbstractActor {
                 .build();
     }
 
-    private String getTitle(String name){
+    private String getTitle(String name) {
         return name.replace("game-", "");
     }
 
@@ -60,23 +60,6 @@ public class GameMonitor extends AbstractActor {
         gamePane.getTransforms().add(scale);
         Label label = new Label();
         label.setText(getTitle(gameName));
-        pane.setAlignment(Pos.CENTER);
-        pane.getChildren().add(label);
-        pane.getChildren().add(gamePane);
-        return pane;
-    }
-
-    private Pane getStartPane(){
-        Pane gamePane = GamePane.getStartPane();
-        VBox pane = new VBox();
-        pane.setMaxSize(100.0, 100.0);
-        pane.setMinSize(100.0, 100.0);
-        Scale scale = new Scale();
-        scale.setX(0.5);
-        scale.setY(0.5);
-        gamePane.getTransforms().add(scale);
-        Label label = new Label();
-        label.setText(getTitle("Ready to play"));
         pane.setAlignment(Pos.CENTER);
         pane.getChildren().add(label);
         pane.getChildren().add(gamePane);
@@ -105,6 +88,12 @@ public class GameMonitor extends AbstractActor {
         });
     }
 
+    private ColumnConstraints create20PercentCol(){
+        ColumnConstraints col = new ColumnConstraints();
+        col.setPercentWidth(20);
+        return col;
+    }
+
     private void initialize() {
         Stage stage = new Stage();
         stage.setTitle("Space invaders");
@@ -113,8 +102,23 @@ public class GameMonitor extends AbstractActor {
 
         root = new GridPane();
         root.setPadding(new Insets(10, 10, 10, 10));
-        root.setVgap(5);
-        root.setHgap(5);
+        root.setVgap(10);
+        root.setHgap(10);
+
+
+        ColumnConstraints col1 = new ColumnConstraints();
+        col1.setPercentWidth(20);
+
+        ColumnConstraints col2 = new ColumnConstraints();
+        col2.setPercentWidth(20);
+        root.getColumnConstraints()
+                .addAll(
+                        create20PercentCol(),
+                        create20PercentCol(),
+                        create20PercentCol(),
+                        create20PercentCol(),
+                        create20PercentCol());
+
 
         Scene scene = new Scene(root, 1200, 900);
         scene.getStylesheets().add("style.css");
