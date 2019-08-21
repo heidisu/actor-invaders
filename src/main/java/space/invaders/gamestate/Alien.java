@@ -1,6 +1,7 @@
 package space.invaders.gamestate;
 
 import akka.actor.AbstractActor;
+import akka.actor.ActorRef;
 import akka.actor.Props;
 import space.invaders.dto.AlienDto;
 import space.invaders.dto.Image;
