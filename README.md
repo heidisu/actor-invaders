@@ -258,16 +258,43 @@ First we need to add the maven dependency for Akka Typed, copy the following lin
 #### Create behaviours for the Player
 The new typed `Player` will no longer extend the `AbstractActor`, instead we will replace the `receive` method with static methods that return `Behavior`.
 
-The player has some private fields, like position of the player and the number of lives which now has to be a part of the behaviors, some of the other variable doesn't change, and can be made static. 
+The player has some private fields, like position of the player and the number of lives which now has to be a part of the behaviors, some of the other variable doesn't change, make these static. 
 
-The current player sends a message back to its parent right after it is created so that the player becomes visible right away. In typed actors the sender or parent are no longer a part of the context, so we either have to include the sender in each messages, or in our case where the player mainly send messages to its parent, get this actor refrence once and keep it. The second suggestion is easiest so we will go with that. 
+The current player sends a message back to its parent right after it is created so that the player becomes visible right away. In typed actors the sender or parent are no longer a part of the context, so we either have to include the sender in each messages, or in our case where the player mainly send messages to its parent, get this actor refrence once and keep it. The second suggestion is the easiest, so we will go with that for now. 
 
-The behaviours are typed so we will need an interface that all messages the `Player` respond to should implement. Make this interface, find a suitable name, for instance `PlayerMessage`, and make the messages the `Player` currently respond to implement this interface, it should be the `MoveLeft` and `MoveRight` in `Game`, the `Fire` in `Player` and the `AlienBulletMoved` in `Events`.
+The behaviours are typed so we will need an interface that all messages the `Player` respond to should implement. Make this interface, find a suitable name, for instance `PlayerMessage`, and make alle the messages the `Player` currently respond to implement this interface, it should be the `MoveLeft` and `MoveRight` in `Game`, the `Fire` in `Player` and the `AlienBulletMoved` in `Events`.
 
-We will also make a new message `Start`in `Player` which implements the interface, and takes an actorref of the `Game` as constructor parameter, the `Game`will use this to start the `Player`. We will then make two methods for the behaviours, one for when the `Player`has not been started yet, then it should only respond to the `Start` message, and one for when the `Player` has been started, then it should not respond to `Start`, but instead the usual messages for move, fire and alien bullets. 
+We will also make a new message `Start`in `Player` which implements the interface, and takes an actorref of the `Game` as constructor parameter, the `Game` will use this to start the `Player`. Then make two methods for the behaviours, one for when the `Player`has not been started yet, then it should only respond to the `Start` message, and one for when the `Player` has been started, then it should not respond to `Start`, but instead the usual messages for move, fire and alien bullets. 
 
+```
 
+    static Behavior<PlayerMessage> startPlayer() {
+        return Behaviors.receive(PlayerMessage.class)
+                .onMessage(
+                        Start.class,
+                        (context, message) -> {
+                           // do stuff
+                        }
+                ).build();
+    }
+
+    private static Behavior<PlayerMessage> playing(ActorRef parent, int posX, int posY, int lives) {
+        return Behaviors.receive(PlayerMessage.class)
+                .onMessage(
+                        Game.MoveLeft.class,
+                        (context, moveLeft) -> {
+                            // do stuff
+                        }
+                ).build();
+    }
+```
+
+The other actors in the system are still the regular untyped ones, so when this typed actor wants to `tell` something to an untyped actor, it has to provide itself as an untyped actor as the sender. There is a useful `Adapter` class with static methods for converting between typed and untyped, so `Adapter.toUntyped` will do the trick.
+
+Also, if you used some private methods in the player earlier to calculate hit or get the dto, these now have to be static in order to be used by the static behaviours.
 
 #### Update Game with the typed Player
+
+
 
 #### Stop bullets
