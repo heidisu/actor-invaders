@@ -1,7 +1,6 @@
 package space.invaders.gamestate;
 
 import akka.actor.AbstractActor;
-import akka.actor.ActorRef;
 import akka.actor.Props;
 import space.invaders.dto.AlienDto;
 import space.invaders.dto.Image;
@@ -13,12 +12,14 @@ public class Alien extends AbstractActor {
     private int posX;
     private final int posY;
     private final AlienImageSet imageSet;
-    private int countDown = 10;
+    private static final int ticksBetweenMove = 10;
+    private static final int movesBetweenDirectionChange = 15;
+    private int countTicks = 0;
+    private int countMoves = 0;
     private Image currentImage;
-    private final Function<Integer, Integer> moveRight = i -> i + 5;
-    private final Function<Integer, Integer> moveLeft = i -> i - 5;
+    private static final Function<Integer, Integer> moveRight = i -> i + 5;
+    private static final Function<Integer, Integer> moveLeft = i -> i - 5;
     private Function<Integer, Integer> move = moveRight;
-    private int countMoves;
 
     static Props props(int id, int posX, int posY, AlienImageSet imageSet){
         return Props.create(Alien.class, () -> new Alien(id, posX, posY, imageSet));
@@ -36,21 +37,29 @@ public class Alien extends AbstractActor {
     public Receive createReceive() {
         return receiveBuilder()
                 .match(Game.Tick.class, tick -> {
-                    if(countDown == 0) {
-                        currentImage = imageSet.getOther(currentImage);
-                        posX = move.apply(posX);
-                        countDown = 10;
-                        countMoves++;
-                    }
-                    else {
-                        countDown--;
-                    }
-                    if (countMoves == 15){
-                        countMoves = -15;
-                        move = move.equals(moveLeft) ? moveRight : moveLeft;
-                    }
+                    move();
+                    changeDirection();
                     getContext().getParent().tell(new AlienDto(id, posX, posY, currentImage), getSelf());
                 } )
                 .build();
+    }
+
+    private void changeDirection() {
+        if (countMoves == movesBetweenDirectionChange){
+            countMoves = -movesBetweenDirectionChange;
+            move = move.equals(moveLeft) ? moveRight : moveLeft;
+        }
+    }
+
+    private void move() {
+        if(countTicks == ticksBetweenMove) {
+            currentImage = imageSet.getOther(currentImage);
+            posX = move.apply(posX);
+            countTicks = 0;
+            countMoves++;
+        }
+        else {
+            countTicks++;
+        }
     }
 }
