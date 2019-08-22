@@ -291,10 +291,11 @@ We will also make a new message `Start`in `Player` which implements the interfac
 
 The other actors in the system are still the regular untyped ones, so when this typed actor wants to `tell` something to an untyped actor, it has to provide itself as an untyped actor as the sender. There is a useful `Adapter` class with static methods for converting between typed and untyped, so `Adapter.toUntyped` will do the trick.
 
-Also, if you used some private methods in the player earlier to calculate hit or get the dto, these now have to be static in order to be used by the static behaviours.
+Also, if you used some private methods in the player earlier to calculate hits or create the dto, these will of course have to be static in order to be used by the static behaviours.
 
 #### Update Game with the typed Player
-
-
+In `Game` we will have to repair all the places where we earlier used the `Player` actor. Start with changing the instance member `player`to be of type `akka.actor.typed.ActorRef<PlayerMessage>`. 
+In the `getIdle()` receiver method the creation of the player has to be modified a bit. We cannot longer create it from props as before, instead we can use the ` Adapter.spawn` to create spawn the typed actor. Once the actor is created, we will have to send it the `Start` message. The player should subscribe to the bullet events as before, but again we have to use `Adapter.toUntyped`to get an untyped actor reference.
+The remaining thing to do in the `Game` class now is to remove all referece to `getSelf()` when sending messages to the player, since the typed `tell` doesn't include the reference of the sender,
 
 #### Stop bullets
