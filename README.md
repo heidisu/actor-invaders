@@ -243,7 +243,7 @@ Start the game application first, and then the gui, and, hey, everything works a
 
 ### Bonus task 2: Akka Typed
 
-There is another actor API we haven't talked about yet, the [Akka Typed](https://doc.akka.io/docs/akka/current/typed/index.html). One challenge with the `AbstractActor` API we have used so far is that there is no control of what messages an actor will react to, and what messages can be sent to an actor. It is easy to loose control over the message flow. As the name suggests, the Akka Typed API improves this.
+There is another actor API we haven't talked about yet, the [Akka Typed](https://doc.akka.io/docs/akka/current/typed/index.html). One challenge with the `AbstractActor` API we have used so far is that there is no control of what messages an actor will react to, and what messages can be sent to an actor. It is easy to loose control over the message flow. As the name suggests, the Akka Typed API improves this by create behavoiurs which only respond to given types of messages. The API is also more restrictive on what actors can do to other actors, and of the content of the actor context, both which lead to a stronger encapsulation.
 
 #### Add dependency
 First we need to add the maven dependency for Akka Typed, copy the following lines into your `pom.xml` file.
@@ -299,3 +299,6 @@ In the `getIdle()` receiver method the creation of the player has to be modified
 The remaining thing to do in the `Game` class now is to remove all referece to `getSelf()` when sending messages to the player, since the typed `tell` doesn't include the reference of the sender,
 
 #### Stop bullets
+The game seems to work, but it will crash when a bullet hits the player. That is because the player tries to stop the bullet by calling `getContext().stop()`. In the typed API one actor is not allowed to stop actors other than itself and its children, so we will have to make a new message type to tell the bullet to stop. Create a new message type in `Bullet`, for instance `Stop`, and when a bullet is hit by the player, send it this message instead of trying to stop it from the context.
+
+The game should now work as before, and we have got a glimpse of how the typed API works.
