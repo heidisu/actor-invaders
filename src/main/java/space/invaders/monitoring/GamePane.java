@@ -1,13 +1,12 @@
 package space.invaders.monitoring;
 
 import javafx.scene.Node;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Circle;
+import javafx.scene.shape.Rectangle;
 import space.invaders.dto.AlienDto;
 import space.invaders.dto.BulletDto;
 import space.invaders.dto.GameStateDto;
@@ -21,7 +20,6 @@ import java.util.stream.Collectors;
 public class GamePane {
     private ImageView player;
     private Pane root;
-    private boolean playing = false;
     private Label livesLabel;
     private Label gameoverLabel;
     private Map<Integer, Circle> idToBullets = new HashMap<>();
@@ -35,6 +33,10 @@ public class GamePane {
     public GamePane(GameStateDto gameStateDto) {
         gameState = gameStateDto;
         initialize();
+    }
+
+    boolean isGameOver(){
+        return gameState.state == GameStateDto.State.GameLost || gameState.state == GameStateDto.State.GameWon;
     }
 
     private void createLivesLabel(){
@@ -83,29 +85,11 @@ public class GamePane {
     }
 
     private void initialize() {
-        root = new StackPane();
-        Button btn = new Button();
-        btn.setText("Start game");
-        root.getChildren().add(btn);
-        createLivesLabel();
-        createGameOverLabel();
-    }
-
-    static Pane getStartPane() {
-        Pane pane = new StackPane();
-        Button btn = new Button();
-        btn.setText("Start game");
-        pane.getChildren().add(btn);
-        pane.setMinWidth(width);
-        pane.setMaxWidth(width);
-        pane.setMinHeight(height);
-        pane.setMaxHeight(height);
-        return pane;
-    }
-
-    private void startPlaying() {
         root = new Pane();
+        root.setClip(new Rectangle(width, height));
+        createLivesLabel();
         root.getChildren().add(livesLabel);
+        createGameOverLabel();
     }
 
     private void addGameOverLabel(String text){
@@ -124,10 +108,6 @@ public class GamePane {
         this.gameState = gameStateDto;
         switch (gameStateDto.state) {
             case Playing:
-                if(!playing) {
-                    playing = true;
-                    startPlaying();
-                }
                 if(gameStateDto.player != null) {
                     updatePlayer(gameStateDto.player);
                 }
@@ -193,6 +173,7 @@ public class GamePane {
                 alien -> id -> {
                     ImageView newAlien = createAlien(alien);
                     root.getChildren().add(newAlien);
+                    newAlien.setManaged(false);
                     return newAlien;
                 };
 
