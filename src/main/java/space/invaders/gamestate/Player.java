@@ -59,8 +59,8 @@ public class Player extends AbstractActor {
                 .match(Events.AlienBulletMoved.class, bm -> {
                     if (isHit(bm.bulletDto.posX, bm.bulletDto.posY)){
                         lives --;
-                        context().stop(bm.bulletActor);
-                        context().parent().tell(getPlayerDto(), self());
+                        getContext().stop(bm.bulletActor);
+                        getContext().parent().tell(getPlayerDto(), self());
                     }
                 })
                 .build();
