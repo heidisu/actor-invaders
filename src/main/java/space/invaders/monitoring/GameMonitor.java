@@ -2,11 +2,13 @@ package space.invaders.monitoring;
 
 import akka.actor.AbstractActor;
 import akka.actor.Props;
+import javafx.beans.binding.Bindings;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.layout.*;
+import javafx.scene.text.TextAlignment;
 import javafx.scene.transform.Scale;
 import javafx.stage.Stage;
 import space.invaders.dto.GameStateDto;
@@ -19,7 +21,9 @@ import java.util.Map;
 public class GameMonitor extends AbstractActor {
     private GridPane root;
     private Map<String, GamePane> gameStates = new HashMap<>();
-    private String[][] grid = new String[5][4];
+    private final int rows = 4;
+    private final int cols = 5;
+    private GridElement[][] grid = new GridElement[rows][cols];
     private List<String> games = new ArrayList<>();
 
     static public Props props() {
@@ -48,36 +52,28 @@ public class GameMonitor extends AbstractActor {
                 .build();
     }
 
-    private String getTitle(String name) {
-        return name.replace("game-", "");
-    }
-
-    private Pane getGameWithTitle(GamePane game, String gameName) {
-        Pane gamePane = game.getGamePane();
-        VBox pane = new VBox();
-        pane.setMaxSize(100.0, 100.0);
-        pane.setMinSize(100.0, 100.0);
-        Scale scale = new Scale();
-        scale.setX(0.5);
-        scale.setY(0.5);
-        gamePane.getTransforms().add(scale);
-        Label label = new Label();
-        label.getStyleClass().add("player-label");
-        label.setText(getTitle(gameName));
-        label.setAlignment(Pos.TOP_CENTER);
-        pane.setAlignment(Pos.CENTER);
-        pane.getChildren().add(label);
-        pane.getChildren().add(gamePane);
-        return pane;
-    }
-
-
     private void insertGame(String name, GamePane gp) {
-        for (int i = 0; i < 5; i++) {
-            for (int j = 0; j < 4; j++) {
+        GridElement gridElement = new GridElement(name, gp);
+
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
                 if (grid[i][j] == null) {
-                    grid[i][j] = name;
-                    root.add(getGameWithTitle(gp, name), j, i);
+                    grid[i][j] = gridElement;
+                    root.add(gridElement.pane, j, i);
+                    return;
+                }
+            }
+        }
+
+        String oldestGame = games.isEmpty() ? grid[0][0].name : games.get(0);
+        for (int i = 0; i < rows; i++){
+            for (int j = 0; j < cols; j++){
+                GridElement current = grid[i][j];
+                if(oldestGame.equals(current.name)){
+                    games.remove(current.name);
+                    root.getChildren().remove(current.pane);
+                    grid[i][j] = gridElement;
+                    root.add(gridElement.pane, j, i);
                     return;
                 }
             }
@@ -133,5 +129,34 @@ public class GameMonitor extends AbstractActor {
         root.applyCss();
         root.getChildren().add(new Label());
         stage.show();
+    }
+
+    private static class GridElement {
+        String name;
+        Pane pane;
+
+        private String getTitle(String name) {
+            return name.replace("game-", "").toUpperCase();
+        }
+
+        private Pane createPane(GamePane game, String gameName) {
+            Pane gamePane = game.getGamePane();
+            Scale scale = new Scale();
+            scale.setX(0.5);
+            scale.setY(0.5);
+            gamePane.getTransforms().add(scale);
+            Label label = new Label();
+            label.getStyleClass().add("player-label");
+            label.setText(getTitle(gameName));
+            label.setTextAlignment(TextAlignment.CENTER);
+            label.setAlignment(Pos.TOP_CENTER);
+            label.minWidthProperty().bind(Bindings.add(0, gamePane.widthProperty()));
+            return new VBox(label, gamePane);
+        }
+
+        GridElement(String name, GamePane gamePane) {
+            this.name = name;
+            this.pane = createPane(gamePane, name);
+        }
     }
 }
