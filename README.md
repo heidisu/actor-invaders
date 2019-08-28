@@ -53,37 +53,37 @@ java -jar target/actor-invaders-1.0-SNAPSHOT-uber.jar
 If you see a black screen with a start button when running the application, you are good to go!
 
 ## Task 1: Let the game begin
-The actor `Game` is the main actor. It will receive messages from the `GUI` actor and the message scehduler, and create and organize actors for handling the player, the aliens, and the bullets, and send new game state back to the `GUI`.
+The actor `Game` is the main actor. It will receive messages from the `GUI` actor and the message scheduler, and create and organize actors for handling the player, the aliens, and the bullets, and send new game state back to the `GUI`.
 Initially `Game` has five message types; `Tick`, `Start`, `Fire`, `MoveLeft` and `MoveRight`. (We will add more later, and it will receive DTO objects as messages) 
 
-The first message is the one that gets the game going. At every `Tick` the current game state is sent to the `GUI` actor. `Start` is received when the user clicks the "Start game" button, and should move `Game` into an active state. When the `Game`is in active state it should response to the commands `Fire`, `MoveLeft` and `MoveRight` from the player, and `Tick`from the scheduler.
+The first message is the one that gets the game going. At every `Tick` the current game state is sent to the `GUI` actor. `Start` is received when the user clicks the "Start game" button, and should move `Game` into an active state. When the `Game` is in active state it should response to the commands `Fire`, `MoveLeft` and `MoveRight` from the player, and `Tick` from the scheduler.
 
 ![The different states of the Game](img/gamestate.png "The different states of the game")
 
-Instead of having conditionals and flags to decide whether the actor should react to the the different messages or not, it will be better to keep the states clean and separate from each other. For that we will use the [`become`](https://doc.akka.io/docs/akka/2.5/actors.html) functionality to move between the states.
-* In the `Game` actor make two methods that both return`Receive` objects, one for when the game has not yet started, and one for when the `Game` is playing, you can for instance call them `getIdle` and `getPlaying`.
+Instead of having conditionals and flags to decide whether the actor should react to the different messages or not, it will be better to keep the states clean and separate from each other. For that we will use the [`become`](https://doc.akka.io/docs/akka/2.5/actors.html) functionality to move between the states.
+* In the `Game` actor make two methods that both return `Receive` objects, one for when the game has not yet started, and one for when the `Game` is playing, you can for instance call them `getIdle` and `getPlaying`.
   * `Receive` objects is made with `receiveBuilder()`. Add a `.match()` for each message that should be received, and finally `.build()` to get the `Receive`.
-* The idle `Recieve` should only react to `Start` messages, and when it receive such a message it should create the `Player` actor, and then become the playing `Receive`.
-  * The player actor can be created by`getContext().actorOf(Player.props(), "player")` You are in the context on the `Game` actor, so the player actor will be a child of the `Game` actor, with the name "player". 
+* The idle `Recieve` should only react to `Start` messages, and when it receives such a message it should create the `Player` actor, and then become the playing `Receive`.
+  * The player actor can be created by `getContext().actorOf(Player.props(), "player")` You are in the context on the `Game` actor, so the player actor will be a child of the `Game` actor, with the name "player". 
   * You might want to save the player actorref in an instance variable so you have it for later
   * Maybe you also want to log that the game has started, so you really know. There is a `log` instance member use can use for that.
-  * Finally, the `Game` should move on to playing state. That is acheived with `getContext().become()`.
+  * Finally, the `Game` should move on to playing state. That is achieved with `getContext().become()`.
 * The second, the playing `Receive`, should *not* react to `Start`, but the other messages. 
-  * When it recieves `Tick`it should tell the `GameStateDto` to the gui actor. The way to tell something to an actor is to use the `tell` method on an `actorRef` like `guiActor.tell(new GameStateDto(...), getSelf()))`. The bullets and aliens can just be empty lists for the time being. The `playerDto`is available as an instance variable, but it is immutable and thus safe to give away, the state can be `GameStateDto.State.Playing`.
-  * The messages `MoveLeft` and `MoveRight` can be told further to the `Player`, and we will work with the player in the next session. (We will come back to `Fire`later).
+  * When it receives `Tick` it should tell the `GameStateDto` to the GUI actor. The way to tell something to an actor is to use the `tell` method on an `actorRef` like `guiActor.tell(new GameStateDto(...), getSelf()))`. The bullets and aliens can just be empty lists for the time being. The `playerDto` is available as an instance variable, but it is immutable and thus safe to give away, the state can be `GameStateDto.State.Playing`.
+  * The messages `MoveLeft` and `MoveRight` can be told further to the `Player`, and we will work with the player in the next session. (We will come back to `Fire` later).
 * Make sure that the `createReceive()` method returns the receiver for the idle state.
 * Start the application and see that you can click the start button and then is showed an empty, black screen. (Yeah, really exciting!)
 
 ## Task 2: Make the player move
-Let us get the player into action! Both the player and the aliens are represented by images on the game screen. The screen has fixed size of `600 x 400` px, where `(0, 0)` is the upper left corner, and the position of an image is given by the coordinates of the image's upper left corner.
+Let us get the player into action! Both the player and the aliens are represented by images on the game screen. The screen has fixed size of `600 × 400` px, where `(0, 0)` is the upper left corner, and the position of an image is given by the coordinates of the image's upper left corner.
 
 ![The coordinate system](img/screen-coordinates.png "The coordinate system of the screen")
 
-The `Player`is the actor for the state of actual players's cannon in the game, and it keeps its current position (`posX`, `posY`) and the remaining number of `lives` as its state variables. Every time the player move it will send a `PlayerDto` to its parent actor `Game` (and the `Game` will include that dto as a part of a `GameStateDto` at every `Tick`). 
+The `Player` is the actor for the state of actual player's cannon in the game, and it keeps its current position (`posX`, `posY`) and the remaining number of `lives` as its state variables. Every time the player move it will send a `PlayerDto` to its parent actor `Game` (and the `Game` will include that dto as a part of a `GameStateDto` at every `Tick`). 
 
 * We will need to be able to make a `PlayerDto` quite often, so we can probably just create a method that makes one, and returns it. There is already a constant `image` that can be used as argument to the `PlayerDto`s constructor.
-* Somewhere in the `Player` we should set the inital position for the cannon, it can be done in the constructor or just set the values where the instance variables are declared. A normal position would be in the middle, at the bottom of the screen. There are constants in the `Player` containing the screen size, which can be used in the calculation. We should also immediately send a `PlayerDto`back to the `Game`. The `Player` actor is a child of `Game`, so we can use `getContext().parent()` to get hold of the `Game` actorRef.
-* In the `Player`'s `createReceive` add matches in the builder for the `Game.MoveLeft` and `Game.MoveRight` messages. In the action function in the match we should update `posX`. Experiment with what number you feel is a good speed, it can be 5. Add the speed to `posX` if the player moves right, and subtract if it moves left. Maybe you also want to stop the player from moving outside the screen? A `PlayerDto` should also be sendt back to the `Game`.
+* Somewhere in the `Player` we should set the initial position for the cannon, it can be done in the constructor or just set the values where the instance variables are declared. A normal position would be in the middle, at the bottom of the screen. There are constants in the `Player` containing the screen size, which can be used in the calculation. We should also immediately send a `PlayerDto` back to the `Game`. The `Player` actor is a child of `Game`, so we can use `getContext().parent()` to get hold of the `Game` actorRef.
+* In the `Player`'s `createReceive` add matches in the builder for the `Game.MoveLeft` and `Game.MoveRight` messages. In the action function in the match we should update `posX`. Experiment with what number you feel is a good speed, it can be 5. Add the speed to `posX` if the player moves right, and subtract if it moves left. Maybe you also want to stop the player from moving outside the screen? A `PlayerDto` should also be sent back to the `Game`.
 * In `Game` we should receive the `PlayerDto` and update the instance variable.
 * Start the game and see that you can move the player with the left and right arrows.
 
