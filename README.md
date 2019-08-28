@@ -113,7 +113,7 @@ The `BulletManager` will create new bullets and keep track of the `BulletDto` it
 ### The Player
 The `Player`needs to be responsible for firing its own bullets, also because the start position of the bullet depends on the current position of the `Player`. The `Player` doesn't know about the `BulletManager`, but it can get to know it by including the manager in messages sent to the `Player`.
 * Make a new message type in the `Player` class, for instance called `Fire`, which has an `ActorRef` for the `BulletManager` as an instance member.
-* Add a new match in the receiveBuilder that maches on this new `Fire` message. When such a message is receive the `Player` should tell the actorRef in the message to `CreateBullet`.
+* Add a new match in the receiveBuilder that maches on this new `Fire` message. When such a message is received the `Player` should tell the actorRef in the message to `CreateBullet`.
 
 
 ### Putting the pieces together
