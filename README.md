@@ -194,7 +194,7 @@ In the class `Events` there are two events, one for when a bullet fired from an 
 
 Do you want to see how easy it is for actors to communicate with remote actors?
 
-Let us split our actor system in two parts. If you look at the actor hierarchy diagram in the introduction you will see our three top level actors, the `GUI`, the `Game` and the `GameIntializer`. We will run the `GUI`actor in one application and keep the `GameIntializer`and the `Game`, with all its child actors, in another, and still be able to play the game. The applications can both be run on your computer, or you can team up with someone, and run one application each.
+Let us split our actor system in two parts. If you look at the actor hierarchy diagram in the introduction you will see our three top-level actors, the `GUI`, the `Game` and the `GameIntializer`. We will run the `GUI` actor in one application and keep the `GameIntializer` and the `Game`, with all its child actors, in another, and still be able to play the game. The applications can both be run on your computer, or you can team up with someone, and run one application each.
 
 #### Serialization
 
@@ -221,14 +221,14 @@ akka {
 
 The things to notice here are the values for `hostname` and `port`. Update the host name with a reachable ip if you will run the applications on different computers, otherwise the configuration can be kept as it is.
 
-We then have to change our `App.java`. The game application will just create an actor system, and the game initializer actor, comment out the line where the gui actor is created, and the last line where the `Initialize` message is sent to the gameIntializer.
+We then have to change our `App.java`. The game application will just create an actor system, and the game initializer actor, comment out the line where the GUI actor is created, and the last line where the `Initialize` message is sent to the gameIntializer.
 
 Build the application with maven, and get hold of the `target/actor-invaders-1.0-SNAPSHOT-uber.jar`. Copy it somewhere else, and rename it so you know it is the application with the game part.
 
 
 #### The GUI application
 
-The gui application need the similar addition in `application.conf`, but change the port to something else, and update the hostname if it will communicate with a different computer.
+The GUI application need the similar addition in `application.conf`, but change the port to something else, and update the hostname if it will communicate with a different computer.
 
 In `App.java` we will create the actor system as before, but comment in the creation of the `GUI` actor, and comment out the creation of the `GameInitializer`. The application needs to get hold of the `GameInitializer` who lives in the remote system. It can do so by using a feature called actor selection in the following way:
 ```
@@ -238,11 +238,11 @@ Note that the host and port in the selection path must match what you configured
 
 #### Run the applications
 
-Start the game application first, and then the gui, and, hey, everything works as before!
+Start the game application first, and then the GUI, and, hey, everything works as before!
 
 ### Bonus task 2: Akka Typed
 
-There is another actor API we haven't talked about yet, the [Akka Typed](https://doc.akka.io/docs/akka/current/typed/index.html). One challenge with the `AbstractActor` API we have used so far is that there is no control of what messages an actor will react to, and what messages can be sent to an actor. It is easy to loose control over the message flow. As the name suggests, the Akka Typed API improves this by create behavoiurs which only respond to given types of messages. The API is also more restrictive on what actors can do to other actors, and of the content of the actor context, both which lead to a stronger encapsulation.
+There is another actor API we haven't talked about yet, the [Akka Typed](https://doc.akka.io/docs/akka/current/typed/index.html). One challenge with the `AbstractActor` API we have used so far is that there is no control of what messages an actor will react to, and what messages can be sent to an actor. It is easy to lose control over the message flow. As the name suggests, the Akka Typed API improves this by creating behaviours which only respond to given types of messages. The API is also more restrictive on what actors can do to other actors, and of the content of the actor context, both which lead to a stronger encapsulation.
 
 #### Add dependency
 First we need to add the maven dependency for Akka Typed, copy the following lines into your `pom.xml` file.
@@ -257,13 +257,13 @@ First we need to add the maven dependency for Akka Typed, copy the following lin
 #### Create behaviours for the Player
 The new typed `Player` will no longer extend the `AbstractActor`, instead we will replace the `receive` method with static methods that return `Behavior`.
 
-The player has some private fields, like position of the player and the number of lives which now has to be a part of the behaviors, some of the other variable doesn't change, make these static. 
+The player has some private fields, like position of the player and the number of lives which now has to be a part of the behaviours, some other variables do not change, make these static. 
 
-The current player sends a message back to its parent right after it is created so that the player becomes visible right away. In typed actors the sender or parent are no longer a part of the context, so we either have to include the sender in each messages, or in our case where the player mainly send messages to its parent, get this actor refrence once and keep it. The second suggestion is the easiest, so we will go with that for now. 
+The current player sends a message back to its parent right after it is created so that the player becomes visible right away. In typed actors the sender or parent are no longer a part of the context, so we either have to include the sender in each message, or in our case where the player mainly send messages to its parent, get this actor reference once and keep it. The second suggestion is the easiest, so we will go with that for now. 
 
-The behaviours are typed so we will need an interface that all messages the `Player` respond to should implement. Make this interface, find a suitable name, for instance `PlayerMessage`, and make alle the messages the `Player` currently respond to implement this interface, it should be the `MoveLeft` and `MoveRight` in `Game`, the `Fire` in `Player` and the `AlienBulletMoved` in `Events`.
+The behaviours are typed, so we will need an interface that all messages the `Player` respond to should implement. Make this interface, find a suitable name, for instance `PlayerMessage`, and make all the messages the `Player` currently respond to implement this interface, it should be the `MoveLeft` and `MoveRight` in `Game`, the `Fire` in `Player` and the `AlienBulletMoved` in `Events`.
 
-We will also make a new message `Start`in `Player` which implements the interface, and takes an actorref of the `Game` as constructor parameter, the `Game` will use this to start the `Player`. Then make two methods for the behaviours, one for when the `Player`has not been started yet, then it should only respond to the `Start` message, and one for when the `Player` has been started, then it should not respond to `Start`, but instead the usual messages for move, fire and alien bullets. 
+We will also make a new message `Start` in `Player` which implements the interface, and takes an actorRef of the `Game` as constructor parameter, the `Game` will use this to start the `Player`. Then make two methods for the behaviours, one for when the `Player` has not been started yet, then it should only respond to the `Start` message, and one for when the `Player` has been started, then it should not respond to `Start`, but instead the usual messages for move, fire and alien bullets. 
 
 ```
 
@@ -293,9 +293,9 @@ The other actors in the system are still the regular untyped ones, so when this 
 Also, if you used some private methods in the player earlier to calculate hits or create the dto, these will of course have to be static in order to be used by the static behaviours.
 
 #### Update Game with the typed Player
-In `Game` we will have to repair all the places where we earlier used the `Player` actor. Start with changing the instance member `player`to be of type `akka.actor.typed.ActorRef<PlayerMessage>`. 
-In the `getIdle()` receiver method the creation of the player has to be modified a bit. We cannot longer create it from props as before, instead we can use the ` Adapter.spawn` to create spawn the typed actor. Once the actor is created, we will have to send it the `Start` message. The player should subscribe to the bullet events as before, but again we have to use `Adapter.toUntyped`to get an untyped actor reference.
-The remaining thing to do in the `Game` class now is to remove all referece to `getSelf()` when sending messages to the player, since the typed `tell` doesn't include the reference of the sender,
+In `Game`, we will have to repair all the places where we earlier used the `Player` actor. Start with changing the instance member `player` to be of type `akka.actor.typed.ActorRef<PlayerMessage>`. 
+In the `getIdle()` receiver method the creation of the player has to be modified a bit. We cannot longer create it from props as before, instead we can use the ` Adapter.spawn` to create spawn the typed actor. Once the actor is created, we will have to send it the `Start` message. The player should subscribe to the bullet events as before, but again we have to use `Adapter.toUntyped` to get an untyped actor reference.
+The remaining thing to do in the `Game` class now is to remove all references to `getSelf()` when sending messages to the player, since the typed `tell` doesn't include the reference of the sender,
 
 #### Stop bullets
 The game seems to work, but it will crash when a bullet hits the player. That is because the player tries to stop the bullet by calling `getContext().stop()`. In the typed API one actor is not allowed to stop actors other than itself and its children, so we will have to make a new message type to tell the bullet to stop. Create a new message type in `Bullet`, for instance `Stop`, and when a bullet is hit by the player, send it this message instead of trying to stop it from the context.
