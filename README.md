@@ -88,68 +88,68 @@ The `Player` is the actor for the state of actual player's cannon in the game, a
 * Start the game and see that you can move the player with the left and right arrows.
 
 ## Task 3: Firing bullets
-There are many ways to think about the bullets and how they should be modelled in the system. Are they owned by the object firing them, or do they live separately from the object creating them? Here we will let the bullets live separate from the object triggering the creation of them. But we need some bookkeeping to be able to deliver a list of current bullets and their positions to the `GUI`actor. We will terminate bullets when they move outside the screen or when they hit another object. Thus, we will also make a `BulletManager` to keep track of the total set of bullets in the game. The bullets themselves are tiny actors that keep track of their own position, and stop themselves if they move outside the screen.
+There are many ways to think about the bullets and how they should be modelled in the system. Are they owned by the object firing them, or do they live separately from the object creating them? Here we will let the bullets live separate from the object triggering the creation of them. But we need some bookkeeping to be able to deliver a list of current bullets and their positions to the `GUI` actor. We will terminate bullets when they move outside the screen or when they hit another object. Thus, we will also make a `BulletManager` to keep track of the total set of bullets in the game. The bullets themselves are tiny actors that keep track of their own position, and stop themselves if they move outside the screen.
 
 ### The Bullet
-The `Bullet`actor has three private field; an `id`, and the position `posX` and `posY`. The `id`  is useful for more effective updates of the `GUI`, and also the actor name has to be unqiue, so the id will be appended to the name when the bullets are created. The `posX`is never updated, the bullets move in straight lines. We will have two types of bullets, those fired by the player, and those fired by the aliens, but for now we will only think of bullets as fired from the player and moving upwards.
+The `Bullet` actor has three private fields; an `id`, and the position `posX` and `posY`. The `id`  is useful for more effective updates of the `GUI`, and also the actor name has to be unique, so the id will be appended to the name when the bullets are created. The `posX` is never updated, the bullets move in straight lines. We will have two types of bullets, those fired by the player, and those fired by the aliens, but for now we will only think of bullets as fired from the player and moving upwards.
 * Make a constructor in the `Bullet` that takes the in the three fields `id`, `posX` and `posY`, and sets the matching private fields. Add a static `props` method, that takes in the same three fields, and returns the props with `Props.create`.
-* In the receive builder we will match for the `Tick`message.
-  * Update the `posY`of the `Bullet`. Again, pick a suitable number, 10 might be the number.
-  * If `posY`is outside the screen, we will stop the bullet. There are [several ways of stopping](https://doc.akka.io/docs/akka/2.5/actors.html#stopping-actors) an actor, depending on what needs to be done when an actor stops. We can just go for the simple `getContext().stop(getSelf())`.
+* In the receive builder we will match for the `Tick` message.
+  * Update the `posY` of the `Bullet`. Again, pick a suitable number, 10 might be the number.
+  * If `posY` is outside the screen, we will stop the bullet. There are [several ways of stopping](https://doc.akka.io/docs/akka/2.5/actors.html#stopping-actors) an actor, depending on what needs to be done when an actor stops. We can just go for the simple `getContext().stop(getSelf())`.
   * Otherwise, if the bullet it not outside the screen, we should create a `BulletDto` and tell that back to the message sender (which should be the same as the parent). The sender in the `BulletDto` should be `BulletDto.Sender.Player`.
 
 ### The BulletManager
-The `BulletManager` will create new bullets and keep track of the `BulletDto` it receives. On every tick it will send the tick further down to each bullet, and send the current list of `BulletDto`s back to `Game`. Note that the manager will not need to wait for the bullets to update their position before it sends the list of dtos back to the `Game`. It just happily send the current situation, so the updates from the `Bullet`actors will take effect in a later tick.
+The `BulletManager` will create new bullets and keep track of the `BulletDto` it receives. On every tick it will send the tick further down to each bullet, and send the current list of `BulletDto`s back to `Game`. Note that the manager will not need to wait for the bullets to update their position before it sends the list of dtos back to the `Game`. It just happily send the current situation, so the updates from the `Bullet` actors will take effect in a later tick.
 * Create a static props method for the `BulletManager`. It does not need any arguments, and we don't need to make a constructor either.
 * The manager needs a new message type for telling it to make new bullets. Make an inner static class for this message, it might be called `CreateBullet`, and it should take two arguments, the x- and y-coordinate of the position where the bullet should be created.
 * We need some structure to keep order in the set of bullets. The manager already got a `refToBullet` for that, which can be used to store the `BulletDto`s it receives from the `Bullet`actors. You can of course use other structures for the bookkeeping if you'd like.
-* The `receiveBuilder`should have matches for `Tick`, `CreateBullet`, `BulletDto`and `Terminated`. The last message is a special one that comes from the lifecycle monitoring in Akka. Any actor can `watch` any other actor, and if the watched actor stops, a `Terminated` message is sent to the watcher. 
-  * When the manager receives a `CreateBullet`it should create a `Bullet` actor, start watching it by calling `getContext().watch(bullet)`. There is an instance variabel `nextId`that can be used for setting the id and incremented afterwards. The id should also be a part of the actor name when bullet is created.
-  * When the `Tick` message is received the manager should send the `Tick`further to all the bullets, and send the bulletDtos of `refToBullet.values()` back to `Game`. The `BulletManager` can get hold of all the bullets by using `getContext().getChildren()`. Create a new message type in`Game` for receiving the list of `bulletDto`s, it could be called `Bullets`. To make sure that we do not share mutable state out, the list of bullets should be put in a new list, it should even be in a `Collections.unmodifiableList`.
+* The `receiveBuilder` should have matches for `Tick`, `CreateBullet`, `BulletDto` and `Terminated`. The last message is a special one that comes from the lifecycle monitoring in Akka. Any actor can `watch` any other actor, and if the watched actor stops, a `Terminated` message is sent to the watcher. 
+  * When the manager receives a `CreateBullet` it should create a `Bullet` actor, start watching it by calling `getContext().watch(bullet)`. There is an instance variable `nextId` that can be used for setting the id and incremented afterwards. The id should also be a part of the actor name when bullet is created.
+  * When the `Tick` message is received the manager should send the `Tick` further to all the bullets, and send the bulletDtos of `refToBullet.values()` back to `Game`. The `BulletManager` can get hold of all the bullets by using `getContext().getChildren()`. Create a new message type in `Game` for receiving the list of `bulletDto`s, it could be called `Bullets`. To make sure that we do not share mutable state out, the list of bullets should be put in a new list, it should even be in a `Collections.unmodifiableList`.
   * On `BulletDto` messages it should just put the sender of the message and the dto in the `refToBullet`.
-  * When a `Bullet`stops, the manager receives a `Terminated` message. The message has a `getActor()`that will give the `ActorRef`of the stopped actor. The manager should remove this stopped bullet from the `refToBullet`.
+  * When a `Bullet` stops, the manager receives a `Terminated` message. The message has a `getActor()`that will give the `ActorRef` of the stopped actor. The manager should remove this stopped bullet from the `refToBullet`.
 
 ### The Player
-The `Player`needs to be responsible for firing its own bullets, also because the start position of the bullet depends on the current position of the `Player`. The `Player` doesn't know about the `BulletManager`, but it can get to know it by including the manager in messages sent to the `Player`.
+The `Player` needs to be responsible for firing its own bullets, also because the start position of the bullet depends on the current position of the `Player`. The `Player` doesn't know about the `BulletManager`, but it can get to know it by including the manager in messages sent to the `Player`.
 * Make a new message type in the `Player` class, for instance called `Fire`, which has an `ActorRef` for the `BulletManager` as an instance member.
-* Add a new match in the receiveBuilder that maches on this new `Fire` message. When such a message is receive the `Player` should tell the actorRef in the message to `CreateBullet`.
+* Add a new match in the receiveBuilder that matches on this new `Fire` message. When such a message is received the `Player` should tell the actorRef in the message to `CreateBullet`.
 
 
 ### Putting the pieces together
 Now we should have all the pieces we need to fire bullets, we only have to put them together in the `Game` actor.
 * Create a `BulletManager`, and keep a reference for it. It can for instance be created when the `Start` message is received.
-* In the `playing` state of the actor, add a match for the `Fire` message. When this message is received, the actor should tell the `Player` the fire message we made in the `Player` class, where an reference to the `BulletManager` is added.
+* In the `playing` state of the actor, add a match for the `Fire` message. When this message is received, the actor should tell the `Player` the fire message we made in the `Player` class, where a reference to the `BulletManager` is added.
 * In the same state it should also add a match for its `Bullets` message. When it receives this, it should keep the list of bullets inside the message in an instance variable. 
-* In the `Tick` match where the `GameStateDto` is sent to the `GUI`, the list of bullets in the previous step should be added. The `Tick`should also be sent down to the `BulletManager`.
+* In the `Tick` match where the `GameStateDto` is sent to the `GUI`, the list of bullets in the previous step should be added. The `Tick` should also be sent down to the `BulletManager`.
 * Start the game and see that the player now can fire bullets, by pushing space. Well done!
 
 ## Task 4: Organize the aliens
 You can of course organize the aliens and have as many of them as you like, below are instructions to make the aliens appear as shown in the gif.
 
-The aliens are organized in a grid of 4 x 10 aliens, where bullets are fired randomly from one of the columns where there still are aliens left. The aliens all has a width of 40 px, and can be evenly distributed on the a screen of width 600 with 20 pixels between the aliens, in all directions.
+The aliens are organized in a grid of 4 × 10 aliens, where bullets are fired randomly from one of the columns where there still are aliens left. The aliens all has a width of 40 px, and can be evenly distributed on a screen of width 600 with 20 pixels between the aliens, in all directions.
 
 ![The grid of aliens](img/alien-grid.png "The grid of aliens")
 
 ### The Alien
-The `Alien` actor keeps track of its current position, and its current image, since the aliens alternate between two images. It also need some logic for moving to the right for some time, then move to the left, and then back again, and for alternating the images.
+The `Alien` actor keeps track of its current position, and its current image, since the aliens alternate between two images. It also needs some logic for moving to the right for some time, then move to the left, and then back again, and for alternating the images.
 * Add a constructor and a static `props` method that takes integers `id`, `posX`, `posY`, and `imageSet` of type `AlienImageSet`, and make (and set) corresponding private fields. The `AlienImageSet` has a `getFirst()` which gives the first image in the set.
 * Add matches in the receiveBulder for `Tick`. On `Tick` the alien should move, and then send  an `AlienDto` message to its parent. Some logic is needed for moving first right, then left, and then to the right again, and to alternate between the two images, the method `getOther` in `AlienImageSet` can be useful for switching the image.
-  * An easy approach can be to just keep two internal counters which are incremented until some limit is reached, one for how many ticks there should be between each time the alien move, and one for how many moves the alien should make before it changes direction. When the first counter reach its limit; change image, move, reset counter and increase the moves counter, otherwise just increase the counter. Then check if the limit of the move counter is reached, if so, change direction and reset the couter to the negated of the initial value, otherwise increase the counter.
+  * An easy approach can be to just keep two internal counters which are incremented until some limit is reached, one for how many ticks there should be between each time the alien move, and one for how many moves the alien should make before it changes direction. When the first counter reach its limit; change image, move, reset counter and increase the moves counter, otherwise just increase the counter. Then check if the limit of the move counter is reached, if so, change direction and reset the counter to the negated of the initial value, otherwise increase the counter.
 
 ### The AlienManager
 The `AlienManager` has some similarities with the `BulletManager`, it creates all the `Alien` actors, and watch them so that it can remove dead aliens. The manager receives `AlienDto` messages from aliens, and sends a current list of `AlienDto`back to `Game` at each `Tick`.
 * Make a constructor and static `props` method. Both should take an `ActorRef` for the `BulletManager` as argument.
 * The grid of aliens can be initialized in the constructor
   * Use for instance a double for loop, and add actorRefs to the manager's grid variable.
-  * Use the three different image sets defined in `AlienImageSet` so that aliens on same row has same image, and the rows alternates between different images.
+  * Use the three different image sets defined in `AlienImageSet` so that aliens on same row has the same image, and the rows alternates between different images.
   * The aliens should be watched by the manager
 * The manager should respond to messages of type `Tick`, `AlienDto`and `Terminated`
-  * On `Tick`the manager should tell all the aliens to tick, and send the list of `AlienDto`s back to the game. You might want to create a new message type for that in `Game`, and we should also add a corresponding match for that message which saves the aliens in `Game`'s instance variable `aliens`.
-  * When `AlienDto`is received, the manager should update the `refToAlien` map.
-  * When `Terminated`is recieved, the dead alien should be removed from all the places it is kept in instance variables.
+  * On `Tick` the manager should tell all the aliens to tick, and send the list of `AlienDto`s back to the game. You might want to create a new message type for that in `Game`, and we should also add a corresponding match for that message which saves the aliens in `Game`'s instance variable `aliens`.
+  * When `AlienDto` is received, the manager should update the `refToAlien` map.
+  * When `Terminated` is recieved, the dead alien should be removed from all the places it is kept in instance variables.
 
 ### The Game
-In `Game`create the `AlienManager`, and send `Tick`also to the `AlienManager`. We you start the application now you should have marching aliens in your game, but the aliens are still very harmless.
+In `Game` create the `AlienManager`, and send `Tick` also to the `AlienManager`. We you start the application now you should have marching aliens in your game, but the aliens are still very harmless.
 
 ## Task 5: Oh no, the aliens attack
 We will now make sure that bullets are fired randomly from one of the columns in the alien grid where there still are aliens left. The bullet should then be fired from the lowermost alien in that column.
