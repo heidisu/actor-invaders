@@ -15,7 +15,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.9</maven.compiler.source>
         <maven.compiler.target>1.9</maven.compiler.target>
-        <akka.version>2.5.23</akka.version>
+        <akka.version>2.5.25</akka.version>
         <openjfx.version>11.0.2</openjfx.version>
     </properties>
 
