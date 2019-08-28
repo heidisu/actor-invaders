@@ -8,13 +8,13 @@ The GUI part is already there, but it isn't doing anything yet, our task will be
 
 ![The actor hierarchy](img/actor-hierarchy.png "The actor hierarchy")
 
-The game loop is driven by a scheduled message `Tick` which is sent to the main `Game`actor 20 times pr second, and `Game`'s main task is to send a `GameStateDto`to the `GUI`.
+The game loop is driven by a scheduled message `Tick` which is sent to the main `Game` actor 20 times per second, and `Game`'s main task is to send a `GameStateDto` to the `GUI`.
 
-There are probably many ways to organize the actors and still get a working game. We have chosen to have a quite clean communcation interface between the `GUI` and the `Game`; `GUI` can send `Start`, `MoveLeft`, `MoveRight` and `Fire` to `Game`, and `Game` only sends `GameStateDto` back to the `GUI`.
+There are probably many ways to organize the actors and still get a working game. We have chosen to have a quite clean communication interface between the `GUI` and the `Game`; `GUI` can send `Start`, `MoveLeft`, `MoveRight` and `Fire` to `Game`, and `Game` only sends `GameStateDto` back to the `GUI`.
 
-`GameStateDto` is an object that contains a complete view of the current state of the game, and the different parts of our actor hierarchy is responsible for providing different parts of it to the `Game` actor, which collects the parts and sends the total picture to the `GUI`actor.
+`GameStateDto` is an object that contains a complete view of the current state of the game, and the different parts of our actor hierarchy is responsible for providing different parts of it to the `Game` actor, which collects the parts and sends the total picture to the `GUI` actor.
 
-Communication between other actors mainly occurs between a parent and its children. This approach gives only one entry point between the gui and the game logic, which makes it easy to have full control over when the game is active, or ended and all the moving parts have to stop. The global `Tick`makes it easy handle speed, and also the aliens move in a synchronized way so they can act entirely on their own. 
+Communication between other actors mainly occurs between a parent and its children. This approach gives only one entry point between the GUI and the game logic, which makes it easy to have full control over when the game is active, or ended and all the moving parts have to stop. The global `Tick` makes it easy to handle speed, and also the aliens move in a synchronized way, so they can act entirely on their own. 
 
 ![The message flow](img/message-flow.png "The flow of messages")
 
@@ -23,9 +23,9 @@ Below are detailed instruction that gradually will make the game work. You can e
 ## A very tiny quick guide to Akka
 Here is a very short summary of the Akka and actor basics you might need for the workshop. You can skip it for now and get back to it if you don't find the answer in the task description. And also, a much better place to look is in the real [Akka documentation](https://doc.akka.io/docs/akka/current/index.html)!
 
-An **Actor** recieves messages, creates other actors, have its internal state. and lives in a hierarchy of actors in an actor system. An actor inherits the class `AbstractActor`, and contains the following important methods
+An **Actor** receives messages, creates other actors, have its internal state, and lives in a hierarchy of actors in an actor system. An actor inherits the class `AbstractActor`, and contains the following important methods
 *  `getSelf()` - `ActorRef` to itself                         
-* `getSender()` - `ActorRef`to the currently processed message 
+* `getSender()` - `ActorRef` to the currently processed message 
 * `getContext()` - the actor context
 
 The **Context** gives contextual information for the actor, like `getChildren()`, `getParent()` and `getSystem()`.  Actors are often created from another actor's context with `getContext().actorOf()`, and the new actor will then be a child of that actor. The constructor of an actor is not used directly, instead each actor class should have a static method returning [`Props`](https://doc.akka.io/docs/akka/current/actors.html#recommended-practices) for its own instantiation. `Props` are created with `Props.create(<MyClass>.class, () -> new <MyClass>(args))`. 
@@ -36,12 +36,11 @@ A **Message** can be sent to an actor by invoking the `ActorRef`'s `tell` method
 
 The **receiving** of messages in an actor is defined in the `createReceive()` method that all actors have to implement. The `Receive` object is created with a `receiveBuilder()`, which is build up by adding a `match` for each message type the actor should respond to, like `receiveBuilder().match(<MyMessage>.class, msg -> {}).build()`. 
 
-The actor can behave like a state machine, by defining different states in terms of `Receive` objects, where different `Recieve`s can respond to different messages, or respond differently to the same message. The transition from one `Receive` to another is called **become**, and within one `Receive` one can move to the next state by invoking `getContext().become(<NextReceive>)`. The `createReceive` method should return the state the actor should start with.
+The actor can behave like a state machine, by defining different states in terms of `Receive` objects, where different `Receive`s can respond to different messages, or respond differently to the same message. The transition from one `Receive` to another is called **become**, and within one `Receive` one can move to the next state by invoking `getContext().become(<NextReceive>)`. The `createReceive` method should return the first state of the actor.
 
 ## Getting started
 To do this workshop you should have the following installed on your computer:
 * [Java JDK](https://www.oracle.com/technetwork/java/javase/downloads/index.html) version >= 9
-  * If you use OpenJDK of version >= 11, the gui library JavaFX is no longer included, and a separate dependency must be added to the `pom.xml`, take a look at the [required change](https://github.com/heidisu/actor-invaders/commit/6f3cba41e00c7143de940a40cd4c4d82a35da514) in the `java-11` branch.
 * [Maven](https://maven.apache.org/)
 * A nice editor, like [IntelliJ](https://www.jetbrains.com/idea/)
 
