@@ -142,6 +142,7 @@ The `AlienManager` has some similarities with the `BulletManager`, it creates al
 * The grid of aliens can be initialized in the constructor
   * Use for instance a double for loop, and add actorRefs to the manager's grid variable.
   * Use the three different image sets defined in `AlienImageSet` so that aliens on same row has the same image, and the rows alternates between different images.
+  * You can use the `getHeight()` of the imageSet to calculate the y coordinate for the next row
   * The aliens should be watched by the manager
 * The manager should respond to messages of type `Tick`, `AlienDto`and `Terminated`
   * On `Tick` the manager should tell all the aliens to tick, and send the list of `AlienDto`s back to the game. You might want to create a new message type for that in `Game`, and we should also add a corresponding match for that message which saves the aliens in `Game`'s instance variable `aliens`.
