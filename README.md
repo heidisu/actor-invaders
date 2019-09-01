@@ -145,7 +145,7 @@ The `AlienManager` has some similarities with the `BulletManager`, it creates al
   * You can use the `getHeight()` of the imageSet to calculate the y coordinate for the next row
   * The aliens should be watched by the manager
 * The manager should respond to messages of type `Tick`, `AlienDto`and `Terminated`
-  * On `Tick` the manager should tell all the aliens to tick, and send the list of `AlienDto`s back to the game. You might want to create a new message type for that in `Game`, and we should also add a corresponding match for that message which saves the aliens in `Game`'s instance variable `aliens`.
+  * On `Tick` the manager should tell all its children, the aliens, to tick, and send the list of `AlienDto`s back to the game. You might want to create a new message type for that in `Game`, and we should also add a corresponding match for that message which saves the aliens in `Game`'s instance variable `aliens`.
   * When `AlienDto` is received, the manager should update the `refToAlien` map.
   * When `Terminated` is recieved, the dead alien should be removed from all the places it is kept in instance variables.
 
@@ -180,8 +180,8 @@ Obviously we need a way for the player and aliens to figure out when they are hi
 
 In the class `Events` there are two events, one for when a bullet fired from an alien, and one for when a bullet is fired from the player. We will let the player subscribe to `AlienBulletMoved` and aliens subscribe to `PlayerBulletMoved`
 
-* Start by making bullets publish the right message on the event stream each time they move. It is done by invoking `getContext().system().eventStream().publish()`. Messages published on the event stream does not have its original sender, that is why the actorRef for the bullet is included in the message.
-* When the `Player` is created, it should also start to subscribe for `AlienBulletMoved` messages, and have a match clause for such messages in its receive builder. If the position of the `BulletDto` is within the area occupied by the player, the player should lose one life, and also stop the bullet actor. 
+* Start by making bullets publish the right message on the event stream each time they move. It is done by invoking `getContext().getSystem().getEventStream().publish()`. Messages published on the event stream does not have its original sender, that is why the actorRef for the bullet is included in the message.
+* When the `Player` is created, it should also start to subscribe for `AlienBulletMoved` messages, and have a match clause for such messages in its receive builder. To make the player subscribe to the messages we can use `getContext().getSystem().getEventStream().subscribe(playerActorRef, AlienBulletMoved.class)`. If the position of the `BulletDto` is within the area occupied by the player, the player should lose one life, and also stop the bullet actor. 
 * Similar with the aliens. They should subscribe to the `PlayerBulletMoved` message, and stop both itself and the bullet when it is hit by the bullet. 
 * Now we only have to update the state in `Game`. We should update the GUI with state `gameWon` if there are no aliens left, and similar `gameLost` if `Game` receives a `PlayerDto` with no lives left. You can choose if you want the logic for this in `Game` or if you want the `Player` and `AlienManager` tell the `Game` when those things happen. To make everything stop when the game is either won or lost, we can make a new receive method for game over, and then let the `Game` become game over.
 
