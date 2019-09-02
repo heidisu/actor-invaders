@@ -40,7 +40,7 @@ The actor can behave like a state machine, by defining different states in terms
 
 ## Getting started
 To do this workshop you should have the following installed on your computer:
-* [Java JDK](https://www.oracle.com/technetwork/java/javase/downloads/index.html) version >= 9
+* [Java JDK](https://www.oracle.com/technetwork/java/javase/downloads/index.html) version >= 11 (Or Oracle JDK >= 9 since these versions contain JavaFX, for OpenJDK use 11 or above)
 * [Maven](https://maven.apache.org/)
 * A nice editor, like [IntelliJ](https://www.jetbrains.com/idea/)
 
