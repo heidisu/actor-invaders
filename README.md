@@ -241,6 +241,9 @@ Note that the host and port in the selection path must match what you configured
 
 Start the game application first, and then the GUI, and, hey, everything works as before!
 
+#### Display your game on the instructor's screen
+If we are lucky with the local network in our workshop room, we can try to display all the game the participants are playing on the big screen. Do as described in the section `The GUI application` above, but get the ip from the instructor instead of the localhost `127.0.0.1`. In addition, you have to change the GUI actor's name to something else. On the last line of `App.java`, replace `player1` in ` gameInitializer.tell(new GameInitializer.Initialize(gui, "player1"), ActorRef.noSender())` to whatever name you would like to be displayed with the game. 
+
 ### Bonus task 2: Akka Typed
 
 There is another actor API we haven't talked about yet, the [Akka Typed](https://doc.akka.io/docs/akka/current/typed/index.html). One challenge with the `AbstractActor` API we have used so far is that there is no control of what messages an actor will react to, and what messages can be sent to an actor. It is easy to lose control over the message flow. As the name suggests, the Akka Typed API improves this by creating behaviours which only respond to given types of messages. The API is also more restrictive on what actors can do to other actors, and of the content of the actor context, both which lead to a stronger encapsulation.
