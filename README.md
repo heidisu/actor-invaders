@@ -294,7 +294,7 @@ Make a new message `Start` in `Player` which implements the `PlayerMessage` inte
 
 The other actors in the system are still the regular untyped ones, so when this typed actor wants to `tell` something to an untyped actor, it has to provide itself as an untyped actor as the sender. There is a useful `Adapter` class with static methods for converting between typed and untyped, so `Adapter.toUntyped` will do the trick.
 
-Also, if you used some private methods in the player earlier to calculate hits or create the dto, these will of course have to be static in order to be used by the static behaviours.
+Also, if you used some private methods in the player earlier to calculate hits or create the dto, these will of course have to be static in order to be used by the static behaviours. When the new behaviour functions are ready you can remove the non static field, the constructor, the `props()` and `receive()` methods and the inheritance of `AbstractActor` in the `Player`.
 
 #### Update Game with the typed Player
 In `Game`, we will have to repair all the places where we earlier used the `Player` actor. Start with changing the instance member `player` to be of type `akka.actor.typed.ActorRef<PlayerMessage>`. 
