@@ -302,6 +302,6 @@ In the `getIdle()` receiver method the creation of the player has to be modified
 The remaining thing to do in the `Game` class now is to remove all references to `getSelf()` when sending messages to the player, since the typed `tell` doesn't include the reference of the sender,
 
 #### Stop bullets
-The game seems to work, but it will crash when a bullet hits the player. That is because the player tries to stop the bullet by calling `getContext().stop()`. In the typed API one actor is not allowed to stop actors other than itself and its children, so we will have to make a new message type to tell the bullet to stop. Create a new message type in `Bullet`, for instance `Stop`, and when a bullet is hit by the player, send it this message instead of trying to stop it from the context.
+The game seems to work, but it might crash when a bullet hits the player. That is probably because the player tries to stop the bullet by calling `context.stop()`, and in the typed API, one actor is not allowed to stop actors other than itself and its children. We can solve this by making a new message type to tell the bullet to stop. Create a new message type in `Bullet`, for instance `Stop`, and when a bullet is hit by the player, send it this message instead of trying to stop it from the context. (The bullet can also be stopped by using the `Adapter.toUntyped` on the context, so we get the untyped context where this restriction on stopping random actors does not exists.)
 
 The game should now work as before, and we have got a glimpse of how the typed API works.
