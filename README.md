@@ -263,11 +263,11 @@ The new typed `Player` will no longer extend the `AbstractActor`, instead we wil
 
 The player has some private fields, like position of the player and the number of lives which now has to be a part of the behaviours, some other variables do not change, make these static. 
 
-The current player sends a message back to its parent right after it is created so that the player becomes visible right away. In typed actors the sender or parent are no longer a part of the context, so we either have to include the sender in each message, or in our case where the player mainly send messages to its parent, get this actor reference once and keep it. The second suggestion is the easiest, so we will go with that for now. 
-
 The behaviours are typed, so we will need an interface that all messages the `Player` respond to should implement. Make this interface, find a suitable name, for instance `PlayerMessage`, and make all the messages the `Player` currently respond to implement this interface, it should be the `MoveLeft` and `MoveRight` in `Game`, the `Fire` in `Player` and the `AlienBulletMoved` in `Events`.
 
-We will also make a new message `Start` in `Player` which implements the interface, and takes an actorRef of the `Game` as constructor parameter, the `Game` will use this to start the `Player`. Then make two methods for the behaviours, one for when the `Player` has not been started yet, then it should only respond to the `Start` message, and one for when the `Player` has been started, then it should not respond to `Start`, but instead the usual messages for move, fire and alien bullets. 
+The current player sends a message back to its parent right after it is created so that the player becomes visible right away. In typed actors the sender or parent are no longer a part of the context, so we either have to include the sender in each message, or in our case where the player mainly send messages to its parent, get this actor reference once and keep it. The second suggestion is the easiest, so we will go with that for now. 
+
+Make a new message `Start` in `Player` which implements the `PlayerMessage` interface, and takes an actorRef of the `Game` as constructor parameter, the `Game` will use this to start the `Player`. Then make two methods for the behaviours, one for when the `Player` has not been started yet, then it should only respond to the `Start` message, and one for when the `Player` has been started, then it should not respond to `Start`, but instead the usual messages for move, fire and alien bullets. 
 
 ```
 
