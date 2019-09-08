@@ -242,7 +242,8 @@ Note that the host and port in the selection path must match what you configured
 Start the game application first, and then the GUI, and, hey, everything works as before!
 
 #### Display your game on the instructor's screen
-If we are lucky with the local network in our workshop room, we can try to display all the game the participants are playing on the big screen. Do as described in the section `The GUI application` above, but get the ip from the instructor instead of the localhost `127.0.0.1`. In addition, you have to change the GUI actor's name to something else. On the last line of `App.java`, replace `player1` in ` gameInitializer.tell(new GameInitializer.Initialize(gui, "player1"), ActorRef.noSender())` to whatever name you would like to be displayed with the game. 
+If we are lucky with the local network in our workshop room, we can try to display all the participants' games on the big screen, where only the GUI will be on the participant's computers and the game actors and a monitor screen will be on the instructors computer.
+Do as described in the section `The GUI application` above, but insert your ip instead of `127.0.0.1` in `hostname` in `application.conf` and get the ip for the instructor's computer, and use that one instead of `127.0.0.1` in the lookup of the `gameInitializer` in `App.java`. In addition, you have to change the GUI actor's name to something else and more unique. On the last line of `App.java`, replace `player1` in ` gameInitializer.tell(new GameInitializer.Initialize(gui, "player1"), ActorRef.noSender())` to whatever name you would like to be displayed with the game on the screen. 
 
 ### Bonus task 2: Akka Typed
 
@@ -302,6 +303,6 @@ In the `getIdle()` receiver method the creation of the player has to be modified
 The remaining thing to do in the `Game` class now is to remove all references to `getSelf()` when sending messages to the player, since the typed `tell` doesn't include the reference of the sender,
 
 #### Stop bullets
-The game seems to work, but it might crash when a bullet hits the player. That is probably because the player tries to stop the bullet by calling `context.stop()`, and in the typed API, one actor is not allowed to stop actors other than itself and its children. We can solve this by making a new message type to tell the bullet to stop. Create a new message type in `Bullet`, for instance `Stop`, and when a bullet is hit by the player, send it this message instead of trying to stop it from the context. (The bullet can also be stopped by using the `Adapter.toUntyped` on the context, so we get the untyped context where this restriction on stopping random actors does not exists.)
+The game seems to work, but it might crash when a bullet hits the player. That is probably because the player tries to stop the bullet by calling `context.stop()`, and in the typed API, one actor is not allowed to stop actors other than itself and its children. We can solve this by making a new message type to tell the bullet to stop. Create a new message type in `Bullet`, for instance `Stop`, and when a bullet is hit by the player, send it this message instead of trying to stop it from the context. (The bullet can also be stopped by using the `Adapter.toUntyped` on the context, so we get the untyped context where this restriction of stopping random actors does not exists.)
 
 The game should now work as before, and we have got a glimpse of how the typed API works.
