@@ -7,8 +7,6 @@ import space.invaders.dto.GameStateDto;
 import space.invaders.dto.Image;
 import space.invaders.dto.PlayerDto;
 
-import java.util.function.Function;
-
 public class Player extends AbstractActor {
     private int lives = 3;
     private int posX;
@@ -26,7 +24,7 @@ public class Player extends AbstractActor {
     static class Fire {
         final ActorRef bulletManager;
 
-        public Fire(ActorRef bulletManager) {
+        Fire(ActorRef bulletManager) {
             this.bulletManager = bulletManager;
         }
     }
@@ -35,22 +33,18 @@ public class Player extends AbstractActor {
         posX = sceneWidth/2 - width/2;
         posY = sceneHeight - height;
         getContext().getParent().tell(getPlayerDto(), getSelf());
-    }
-
-    private void updatePosition(Function<Integer, Integer> move){
-        int newPos = move.apply(posX);
-        posX = newPos < 0 || newPos > sceneWidth - width ? posX : newPos;
+        getContext().getSystem().getEventStream().subscribe(getSelf(), Events.AlienBulletMoved.class);
     }
 
     @Override
     public Receive createReceive() {
         return receiveBuilder()
                 .match(Game.MoveLeft.class, ml -> {
-                    updatePosition(pos -> pos - 5);
+                    posX = Math.max(0, posX -5);
                     getContext().getParent().tell(getPlayerDto(), getSelf());
                 })
                 .match(Game.MoveRight.class, mr -> {
-                    updatePosition(pos -> pos + 5);
+                    posX = Math.min(sceneWidth - width, posX + 5);
                     getContext().getParent().tell(getPlayerDto(), getSelf());
                 })
                 .match(Fire.class, fire -> {
