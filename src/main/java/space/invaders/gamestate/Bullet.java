@@ -3,7 +3,6 @@ package space.invaders.gamestate;
 import akka.actor.AbstractActor;
 import akka.actor.Props;
 import space.invaders.dto.BulletDto;
-
 import space.invaders.dto.GameStateDto;
 
 public class Bullet extends AbstractActor {
