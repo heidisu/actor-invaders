@@ -16,7 +16,6 @@ public class AlienManager extends AbstractActor {
     private final int rows = 4;
     private ActorRef [][] alienGrid = new ActorRef [rows][columns];
     private final ActorRef bulletManager;
-    private int fireBulletCounter = 0;
     private Random random = new Random();
 
     static Props props(ActorRef bulletManager){
