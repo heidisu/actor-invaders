@@ -33,6 +33,7 @@ public class Player extends AbstractActor {
         posX = sceneWidth/2 - width/2;
         posY = sceneHeight - height;
         getContext().getParent().tell(getPlayerDto(), getSelf());
+        getContext().getSystem().getEventStream().subscribe(getSelf(), Events.AlienBulletMoved.class);
     }
 
     @Override

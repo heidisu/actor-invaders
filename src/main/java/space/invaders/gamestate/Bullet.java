@@ -35,6 +35,11 @@ public class Bullet extends AbstractActor {
                     else {
                         BulletDto bulletDto = new BulletDto(id, posX, posY, sender);
                         getContext().getParent().tell(bulletDto, getSelf());
+                        Events.BulletMoved event =
+                                sender == BulletDto.Sender.Player
+                                        ? new Events.PlayerBulletMoved(getSelf(), bulletDto)
+                                        : new Events.AlienBulletMoved(getSelf(), bulletDto);
+                        getContext().getSystem().getEventStream().publish(event);
                     }
                 })
                 .build();

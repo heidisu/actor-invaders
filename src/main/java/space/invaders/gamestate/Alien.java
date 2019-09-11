@@ -37,6 +37,7 @@ public class Alien extends AbstractActor {
         this.posY = posY;
         this.imageSet = imageSet;
         this.currentImage = imageSet.getFirst();
+        getContext().getSystem().getEventStream().subscribe(getSelf(), Events.PlayerBulletMoved.class);
     }
 
     @Override
