@@ -93,23 +93,10 @@ public class Game extends AbstractActor {
                 })
                 .match(MoveLeft.class, ml -> player.tell(ml, getSelf()))
                 .match(MoveRight.class, mr -> player.tell(mr, getSelf()))
-                .match(PlayerDto.class, playerDto -> {
-                    this.playerDto = playerDto;
-                    if(playerDto.lives == 0){
-                        guiActor.tell(new GameStateDto(GameStateDto.State.GameLost, playerDto, bullets, aliens), getSelf());
-                        getContext().become(getGameOver());
-                    }
-                })
+                .match(PlayerDto.class, playerDto -> this.playerDto = playerDto)
                 .match(Fire.class, fire -> player.tell(new Player.Fire(bulletMananger), getSelf()))
                 .match(Bullets.class, bullets -> this.bullets = bullets.bullets)
-                .match(Aliens.class, aliens -> {
-                    boolean noMoreAliens = !this.aliens.isEmpty() && aliens.aliens.isEmpty();
-                    this.aliens = aliens.aliens;
-                    if(noMoreAliens){
-                        guiActor.tell(new GameStateDto(GameStateDto.State.GameWon, playerDto, bullets, this.aliens), getSelf());
-                        getContext().become(getGameOver());
-                    }
-                })
+                .match(Aliens.class, aliens -> this.aliens = aliens.aliens)
                 .build();
     }
 
