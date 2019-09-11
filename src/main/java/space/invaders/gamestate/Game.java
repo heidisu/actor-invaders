@@ -76,7 +76,6 @@ public class Game extends AbstractActor {
         return receiveBuilder()
                 .match(Start.class, start -> {
                         player = getContext().actorOf(Player.props(), "player");
-                        getContext().getSystem().getEventStream().subscribe(player, Events.AlienBulletMoved.class);
                         bulletMananger = getContext().actorOf(BulletManager.props(), "bulletmanager");
                         alienManager = getContext().actorOf(AlienManager.props(bulletMananger), "alienmanager");
                         log.info("Game started!");

@@ -14,12 +14,12 @@ public class AlienManager extends AbstractActor {
     private Map<ActorRef, AlienDto> refToAlien = new HashMap<>();
     private final int columns = 10;
     private final int rows = 4;
-    private ActorRef [][] alienGrid = new ActorRef [rows][columns];
+    private ActorRef[][] alienGrid = new ActorRef[rows][columns];
     private final ActorRef bulletManager;
-    private int fireBulletCounter = 0;
     private Random random = new Random();
+    private int fireBulletCounter;
 
-    static Props props(ActorRef bulletManager){
+    static Props props(ActorRef bulletManager) {
         return Props.create(AlienManager.class, () -> new AlienManager(bulletManager));
     }
 
@@ -32,7 +32,6 @@ public class AlienManager extends AbstractActor {
             for (int j = 0; j < columns; j++) {
                 int posX = 10 + 60 * j;
                 ActorRef alien = getContext().actorOf(Alien.props(id, posX, posY, imageSet), "alien-" + id);
-                getContext().getSystem().getEventStream().subscribe(alien, Events.PlayerBulletMoved.class);
                 getContext().watch(alien);
                 alienGrid[i][j] = alien;
                 id++;
@@ -45,9 +44,11 @@ public class AlienManager extends AbstractActor {
     public Receive createReceive() {
         return receiveBuilder()
                 .match(Game.Tick.class, tick -> {
-                    fireRandomBullet();
+                    if(getContext().getChildren().iterator().hasNext()) {
+                        fireRandomBullet();
+                    }
                     getContext().getChildren().forEach(alien -> alien.tell(tick, getSelf()));
-                    getContext().getParent().tell(new Game.Aliens(Collections.unmodifiableList(new ArrayList<>(refToAlien.values()))), getSelf());
+                    getContext().getParent().tell(new Game.Aliens(new ArrayList<>(refToAlien.values())), getSelf());
                 })
                 .match(AlienDto.class, alienDto -> refToAlien.put(getSender(), alienDto))
                 .match(Terminated.class, terminated -> {
@@ -57,37 +58,46 @@ public class AlienManager extends AbstractActor {
                 .build();
     }
 
-    private void fireRandomBullet() {
-        if(fireBulletCounter < 10 ){
-            fireBulletCounter++;
+    private boolean columnHasAliens (int idx){
+        for(int i = 0; i < rows; i++){
+            if (alienGrid[i][idx] != null){
+                return true;
+            }
         }
-        else {
+        return false;
+    }
+
+    private List<Integer> getNonEmptyColumns() {
+        return IntStream
+                .range(0, columns)
+                .filter(this::columnHasAliens)
+                .boxed()
+                .collect(Collectors.toList());
+    }
+
+    private void fireRandomBullet() {
+        if (fireBulletCounter == 10) {
             fireBulletCounter = 0;
-            List<Integer> nonEmptyColumns =
-                    IntStream
-                            .range(0, columns)
-                            .filter(j -> alienGrid[rows - 1][j] != null)
-                            .boxed()
-                            .collect(Collectors.toList());
+            List<Integer> nonEmptyColumns = getNonEmptyColumns();
             int idx = random.nextInt(nonEmptyColumns.size());
             int col = nonEmptyColumns.get(idx);
-            int maxRow = 0;
             for (int i = 3; i >= 0; i--) {
                 if (alienGrid[i][col] != null) {
-                    maxRow = i;
-                    break;
+                    ActorRef actor = alienGrid[i][col];
+                    actor.tell(new Alien.Fire(bulletManager), getSelf());
+                    return;
                 }
             }
-            ActorRef actor = alienGrid[maxRow][col];
-            actor.tell(new Alien.Fire(bulletManager), getSelf());
+        } else {
+            fireBulletCounter++;
         }
     }
 
-    private void removeAlien(ActorRef deadAlien){
+    private void removeAlien(ActorRef deadAlien) {
         refToAlien.remove(deadAlien);
-        for(int i = 0; i < rows; i++){
-            for(int j = 0; j < columns; j++){
-                if(alienGrid[i][j] == deadAlien){
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < columns; j++) {
+                if (alienGrid[i][j] == deadAlien) {
                     alienGrid[i][j] = null;
                     return;
                 }
