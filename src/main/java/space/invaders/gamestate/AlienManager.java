@@ -44,7 +44,9 @@ public class AlienManager extends AbstractActor {
     public Receive createReceive() {
         return receiveBuilder()
                 .match(Game.Tick.class, tick -> {
-                    fireRandomBullet();
+                    if(getContext().getChildren().iterator().hasNext()) {
+                        fireRandomBullet();
+                    }
                     getContext().getChildren().forEach(alien -> alien.tell(tick, getSelf()));
                     getContext().getParent().tell(new Game.Aliens(new ArrayList<>(refToAlien.values())), getSelf());
                 })
