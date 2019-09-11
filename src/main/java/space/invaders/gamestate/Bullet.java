@@ -5,8 +5,8 @@ import akka.actor.Props;
 import space.invaders.dto.BulletDto;
 
 public class Bullet extends AbstractActor {
-    private /*final*/ int id;
-    private /*final*/ int posX;
+    private final int id;
+    private final int posX;
     private int posY;
 
     static Props props(int id, int posX, int posY){
@@ -23,7 +23,7 @@ public class Bullet extends AbstractActor {
     public Receive createReceive() {
         return receiveBuilder()
                 .match(Game.Tick.class, tick -> {
-                    posY = posY - 10;
+                    posY -= 10;
                     if (posY < 0) {
                         getContext().stop(getSelf());
                     }
