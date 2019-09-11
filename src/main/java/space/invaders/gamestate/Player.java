@@ -24,7 +24,7 @@ public class Player extends AbstractActor {
     static class Fire {
         final ActorRef bulletManager;
 
-        public Fire(ActorRef bulletManager) {
+        Fire(ActorRef bulletManager) {
             this.bulletManager = bulletManager;
         }
     }
