@@ -3,11 +3,12 @@ package space.invaders.gamestate;
 import akka.actor.AbstractActor;
 import akka.actor.Props;
 import space.invaders.dto.BulletDto;
+
 import space.invaders.dto.GameStateDto;
 
 public class Bullet extends AbstractActor {
-    private /*final*/ int id;
-    private /*final*/ int posX;
+    private final int id;
+    private final int posX;
     private int posY;
     private final BulletDto.Sender sender;
     private final int move;
