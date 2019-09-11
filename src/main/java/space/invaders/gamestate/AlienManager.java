@@ -32,7 +32,6 @@ public class AlienManager extends AbstractActor {
             for (int j = 0; j < columns; j++) {
                 int posX = 10 + 60 * j;
                 ActorRef alien = getContext().actorOf(Alien.props(id, posX, posY, imageSet), "alien-" + id);
-                getContext().getSystem().getEventStream().subscribe(alien, Events.PlayerBulletMoved.class);
                 getContext().watch(alien);
                 alienGrid[i][j] = alien;
                 id++;
