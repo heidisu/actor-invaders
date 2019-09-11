@@ -58,15 +58,27 @@ public class AlienManager extends AbstractActor {
                 .build();
     }
 
+    private boolean columnHasAliens (int idx){
+        for(int i = 0; i < rows; i++){
+            if (alienGrid[i][idx] != null){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private List<Integer> getNonEmptyColumns() {
+        return IntStream
+                .range(0, columns)
+                .filter(this::columnHasAliens)
+                .boxed()
+                .collect(Collectors.toList());
+    }
+
     private void fireRandomBullet() {
         if (fireBulletCounter == 10) {
             fireBulletCounter = 0;
-            List<Integer> nonEmptyColumns =
-                    IntStream
-                            .range(0, columns)
-                            .filter(j -> alienGrid[rows - 1][j] != null)
-                            .boxed()
-                            .collect(Collectors.toList());
+            List<Integer> nonEmptyColumns = getNonEmptyColumns();
             int idx = random.nextInt(nonEmptyColumns.size());
             int col = nonEmptyColumns.get(idx);
             for (int i = 3; i >= 0; i--) {
