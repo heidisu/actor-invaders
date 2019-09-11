@@ -6,8 +6,6 @@ import akka.actor.Props;
 import space.invaders.dto.AlienDto;
 import space.invaders.dto.Image;
 
-import java.util.function.Function;
-
 public class Alien extends AbstractActor {
     private final int id;
     private int posX;
@@ -18,9 +16,8 @@ public class Alien extends AbstractActor {
     private int countTicks = 0;
     private int countMoves = 0;
     private Image currentImage;
-    private static final Function<Integer, Integer> moveRight = i -> i + 5;
-    private static final Function<Integer, Integer> moveLeft = i -> i - 5;
-    private Function<Integer, Integer> move = moveRight;
+    private static final int moveRight = 5, moveLeft = -5;
+    private int move = moveRight;
 
     static Props props(int id, int posX, int posY, AlienImageSet imageSet){
         return Props.create(Alien.class, () -> new Alien(id, posX, posY, imageSet));
@@ -36,10 +33,10 @@ public class Alien extends AbstractActor {
 
     public Alien(int id, int posX, int posY, AlienImageSet imageSet) {
         this.id = id;
-        this.currentImage = imageSet.getFirst();
         this.posX = posX;
         this.posY = posY;
         this.imageSet = imageSet;
+        this.currentImage = imageSet.getFirst();
     }
 
     @Override
@@ -63,14 +60,14 @@ public class Alien extends AbstractActor {
     private void changeDirection() {
         if (countMoves == movesBetweenDirectionChange){
             countMoves = -movesBetweenDirectionChange;
-            move = move.equals(moveLeft) ? moveRight : moveLeft;
+            move = move == moveLeft ? moveRight : moveLeft;
         }
     }
 
     private void move() {
         if(countTicks == ticksBetweenMove) {
             currentImage = imageSet.getOther(currentImage);
-            posX = move.apply(posX);
+            posX += move;
             countTicks = 0;
             countMoves++;
         }
