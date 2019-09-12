@@ -81,7 +81,7 @@ public class AlienManager extends AbstractActor {
             List<Integer> nonEmptyColumns = getNonEmptyColumns();
             int idx = random.nextInt(nonEmptyColumns.size());
             int col = nonEmptyColumns.get(idx);
-            for (int i = 3; i >= 0; i--) {
+            for (int i = rows - 1; i >= 0; i--) {
                 if (alienGrid[i][col] != null) {
                     ActorRef actor = alienGrid[i][col];
                     actor.tell(new Alien.Fire(bulletManager), getSelf());
