@@ -9,8 +9,6 @@ import space.invaders.dto.GameStateDto;
 import space.invaders.dto.Image;
 import space.invaders.dto.PlayerDto;
 
-import java.util.function.Function;
-
 public class Player {
     private static final int width = 50;
     private static final int height = 50 * 140 / 280;
@@ -56,14 +54,14 @@ public class Player {
                 .onMessage(
                         Game.MoveLeft.class,
                         (context, moveLeft) -> {
-                            int newPosX = getPosition(posX, pos -> pos - 5);
+                            int newPosX = Math.max(0, posX - 5);
                             parent.tell(getPlayerDto(newPosX, posY, lives), Adapter.toUntyped(context.getSelf()));
                             return playing(parent, newPosX, posY, lives);
                         })
                 .onMessage(
                         Game.MoveRight.class,
                         (context, moveRight) -> {
-                            int newPosX = getPosition(posX, pos -> pos + 5);
+                            int newPosX = Math.min(sceneWidth - width, posX + 5);
                             parent.tell(getPlayerDto(newPosX, posY, lives), Adapter.toUntyped(context.getSelf()));
                             return playing(parent, newPosX, posY, lives);
                         })
@@ -86,11 +84,6 @@ public class Player {
                             return playing(parent, posX, posY, newLives);
                         }
                 ).build();
-    }
-
-    private static int getPosition(int posX, Function<Integer, Integer> move) {
-        int newPos = move.apply(posX);
-        return newPos < 0 || newPos > sceneWidth - width ? posX : newPos;
     }
 
     private static boolean isHit(int posX, int posY, BulletDto bd) {
